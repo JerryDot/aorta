@@ -7,20 +7,19 @@
  *
  * @format
  */
-
+import 'react-native-get-random-values';
 import React from 'react';
-import {SafeAreaView, ScrollView, StatusBar, StyleSheet, Text, useColorScheme, View} from 'react-native';
+import {useColorScheme} from 'react-native';
 
 import {NavigationContainer} from '@react-navigation/native';
 import {createNativeStackNavigator} from '@react-navigation/native-stack';
 
-import {Colors, DebugInstructions, Header, LearnMoreLinks, ReloadInstructions} from 'react-native/Libraries/NewAppScreen';
-import Section, {sectionStyles} from './src/components/Section';
+import {Colors} from 'react-native/Libraries/NewAppScreen';
 import HomeScreen from './src/screens/HomeScreen';
-import ProfileScreen from './src/screens/ProfileScreen';
 import DietScreen from './src/screens/DietScreen';
 import MoodScreen from './src/screens/MoodScreen';
 import ActivityScreen from './src/screens/ActivityScreen';
+import realm from './src/database/realm';
 
 const Stack = createNativeStackNavigator<RootStackParamList>();
 
