@@ -15,3 +15,9 @@ export const getGeneralRecentRecord = <T>(realmType: RecordString): T | null => 
     return null;
   }
 };
+
+export const deleteRecord = (objectType: RecordString, recordID: string) => {
+  realm.write(() => {
+    realm.delete(realm.objectForPrimaryKey(objectType, recordID));
+  });
+};

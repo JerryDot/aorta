@@ -1,6 +1,13 @@
-import {getGeneralRecentRecord} from './general';
+import {getGeneralRecentRecord, getGeneralRecordsPeriod} from './general';
 import realm, {Mood} from './realm';
 import {v4 as uuidv4} from 'uuid';
+
+export const getMoodRecords = (startDay: Date): Realm.Results<Mood> => {
+  // Should be given the start of a day at 1200 am
+  const endDay = new Date(startDay);
+  endDay.setDate(startDay.getDate() + 1);
+  return getGeneralRecordsPeriod<Mood>('Mood', startDay, endDay);
+};
 
 export const addMoodRecord = (rating: number) => {
   const possiblePrevRecord = getGeneralRecentRecord<Mood>('Mood');

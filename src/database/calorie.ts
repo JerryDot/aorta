@@ -38,7 +38,3 @@ export const editCalorieRecord = (recordID: string, date?: Date, amount?: number
     }
   });
 };
-
-export const deleteCalorieRecord = (recordID: string) => {
-  realm.delete(realm.objectForPrimaryKey('Calorie', recordID));
-};
