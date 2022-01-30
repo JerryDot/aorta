@@ -37,10 +37,11 @@ const MoodScreen = ({navigation}: Props) => {
     <>
       <Text>This is {dailyRecords.length ? (dailyRecords.sum('rating') || 0) / dailyRecords.length : 'empty'}</Text>
       {buttonOptions.map(rating => (
-        <AddMoodButton rating={rating} />
+        <AddMoodButton key={'amb' + rating} rating={rating} />
       ))}
       {dailyRecords.map(record => (
         <Text
+          key={record.recordID}
           onPress={() =>
             deleteMoodRecordHandler(record.recordID)
           }>{`${record.date} ${record.rating} ${record.recordID} ${record.flavour} ${record.comment}`}</Text>

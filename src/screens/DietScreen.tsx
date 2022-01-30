@@ -34,10 +34,12 @@ const DietScreen = ({navigation}: Props) => {
     <>
       <Text>This is {dailyRecords.sum('amount')}</Text>
       {buttonOptions.map(amount => (
-        <AddCalorieButton amount={amount} />
+        <AddCalorieButton key={'acb' + amount} amount={amount} />
       ))}
       {dailyRecords.map(record => (
-        <Text onPress={() => deleteCalorieRecordHandler(record.recordID)}>{`${record.date} ${record.amount} ${record.recordID}`}</Text>
+        <Text
+          key={record.recordID}
+          onPress={() => deleteCalorieRecordHandler(record.recordID)}>{`${record.date} ${record.amount} ${record.recordID}`}</Text>
       ))}
     </>
   );
