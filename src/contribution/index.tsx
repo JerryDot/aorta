@@ -1,4 +1,5 @@
 import {ViewStyle} from 'react-native';
+import {activityColors} from '../screens/ActivityScreen';
 
 import {AbstractChartProps} from './abstractChart';
 import ContributionGraph, {ContributionChartValue, TooltipDataAttrs} from './contributionGraph';
@@ -9,6 +10,8 @@ export interface ContributionGraphProps extends AbstractChartProps {
   numDays: number;
   width: number;
   height: number;
+  activityColorMap: activityColors;
+  borderSize?: number;
   gutterSize?: number;
   squareSize?: number;
   horizontal?: boolean;

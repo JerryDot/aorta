@@ -63,6 +63,22 @@ class ContributionGraph extends AbstractChart<ContributionGraphProps, Contributi
     return 2 * (squareSize + MONTH_LABEL_GUTTER_SIZE);
   }
 
+  getBorderColorForIndex(index: number) {
+    console.log(index);
+    console.log(this.props.activityColorMap);
+    console.log(this.state.valueCache[index]);
+    if (this.state.valueCache[index]) {
+      if (this.state.valueCache[index].value) {
+        console.log(this.state.valueCache[index].value);
+        const activityType = this.state.valueCache[index].value['activityType'];
+        console.log(activityType);
+        if (activityType) {
+          return this.props.activityColorMap[activityType];
+        }
+      }
+    }
+  }
+
   getStartDate() {
     return shiftDate(this.getEndDate(), -this.props.numDays + 1); // +1 because endDate is inclusive
   }
@@ -238,19 +254,44 @@ class ContributionGraph extends AbstractChart<ContributionGraphProps, Contributi
     const {squareSize = SQUARE_SIZE} = this.props;
 
     return (
-      <Rect
-        key={index}
-        width={squareSize}
-        height={squareSize}
-        x={x + paddingLeft}
-        y={y}
-        title={this.getTitleForIndex(index)}
-        fill={this.getClassNameForIndex(index)}
-        onPress={() => {
-          this.handleDayPress(index);
-        }}
-        {...this.getTooltipDataAttrsForIndex(index)}
-      />
+      <>
+        <Rect
+          key={'outerborder' + index}
+          width={squareSize + 2 * this.props.borderSize}
+          height={squareSize + 2 * this.props.borderSize}
+          x={x + paddingLeft - this.props.borderSize}
+          y={y - this.props.borderSize}
+          fill={this.getBorderColorForIndex(index)}
+        />
+        <Rect
+          key={'blankcell' + index}
+          width={squareSize}
+          height={squareSize}
+          x={x + paddingLeft}
+          y={y}
+          fill={this.props.chartConfig.color(
+            mapValue(
+              0,
+              this.state.minValue,
+              this.state.maxValue,
+              0.15 + 0.05, // + 0.05 to make smaller values a bit more visible
+              1,
+            ),
+          )}
+        />
+        <Rect
+          key={index}
+          width={squareSize}
+          height={squareSize}
+          x={x + paddingLeft}
+          y={y}
+          title={this.getTitleForIndex(index)}
+          fill={this.getClassNameForIndex(index)}
+          onPress={() => {
+            this.handleDayPress(index);
+          }}
+          {...this.getTooltipDataAttrsForIndex(index)}></Rect>
+      </>
     );
   }
 
