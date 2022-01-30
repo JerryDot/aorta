@@ -4,6 +4,12 @@ export const getGeneralRecordsPeriod = <T>(realmType: RecordString, startTime: D
   return realm.objects<T>(realmType).filtered('date >= $0 && date < $1', startTime, endTime);
 };
 
+export const getGeneralDayRecords = <T>(realmType: RecordString, startTime: Date): Realm.Results<T> => {
+  const endTime = new Date(startTime);
+  endTime.setDate(startTime.getDate() + 1);
+  return getGeneralRecordsPeriod<T>(realmType, startTime, endTime);
+};
+
 export const getGeneralRecentRecord = <T>(realmType: RecordString): T | null => {
   const endTime = new Date();
   const startTime = new Date();
