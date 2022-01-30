@@ -1,6 +1,6 @@
 import {NativeStackScreenProps} from '@react-navigation/native-stack';
 import React, {useState} from 'react';
-import {Button, Text} from 'react-native';
+import {StyleSheet, Text, View} from 'react-native';
 import {RootStackParamList} from '../../App';
 import realm from '../database/realm';
 import 'react-native-get-random-values';
@@ -8,12 +8,15 @@ import {v4 as uuidv4} from 'uuid';
 import {addMoodRecord, getMoodRecords} from '../database/mood';
 import moment from 'moment';
 import {deleteRecord} from '../database/general';
+import {Grid, Col} from 'react-native-easy-grid';
+import {Button} from 'react-native-elements';
 
 type Props = NativeStackScreenProps<RootStackParamList, 'Home'>;
 
 const MoodScreen = ({navigation}: Props) => {
   const [dailyRecords, setDailyRecords] = useState(getMoodRecords(moment().startOf('day').toDate()));
-  const buttonOptions = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10];
+  const buttonOptions = [1, 2, 3, 4, 5];
+  const secondButtonOptions = [6, 7, 8, 9, 10];
 
   const refetchDailyRecords = () => {
     setDailyRecords(getMoodRecords(moment().startOf('day').toDate()));
@@ -30,17 +33,40 @@ const MoodScreen = ({navigation}: Props) => {
   };
 
   const AddMoodButton = ({rating}: {rating: number}) => (
-    <Button key={rating} title={`+ ${rating} moods`} onPress={() => addMoodRecordHandler(rating)} />
+    <View style={{width: '30%', height: 50, justifyContent: 'center', flexWrap: 'wrap', flexDirection: 'row', flex: 1}}>
+      <Button buttonStyle={{height: 50, width: 60}} key={rating} title={`${rating}`} onPress={() => addMoodRecordHandler(rating)} />
+    </View>
   );
 
   return (
     <>
+      <View style={{height: 40}}>
+        <Grid>
+          <Col>
+            <Button title="Mood" onPress={() => navigation.navigate('Mood')} />
+          </Col>
+          <Col>
+            <Button title="Diet" onPress={() => navigation.navigate('Diet')} />
+          </Col>
+          <Col>
+            <Button title="Activity" onPress={() => navigation.navigate('Activity')} />
+          </Col>
+        </Grid>
+      </View>
       <Text>This is {dailyRecords.length ? (dailyRecords.sum('rating') || 0) / dailyRecords.length : 'empty'}</Text>
-      {buttonOptions.map(rating => (
-        <AddMoodButton key={'amb' + rating} rating={rating} />
-      ))}
+      <View style={{paddingTop: 10, flexDirection: 'row', flexWrap: 'wrap'}}>
+        {buttonOptions.map(rating => (
+          <AddMoodButton key={'amb' + rating} rating={rating} />
+        ))}
+      </View>
+      <View style={{paddingTop: 20, flexDirection: 'row', flexWrap: 'wrap'}}>
+        {secondButtonOptions.map(rating => (
+          <AddMoodButton key={'amb' + rating} rating={rating} />
+        ))}
+      </View>
       {dailyRecords.map(record => (
         <Text
+          style={styles.titleText}
           key={record.recordID}
           onPress={() =>
             deleteMoodRecordHandler(record.recordID)
@@ -49,5 +75,13 @@ const MoodScreen = ({navigation}: Props) => {
     </>
   );
 };
+
+const styles = StyleSheet.create({
+  titleText: {
+    paddingTop: 10,
+    fontSize: 16,
+    fontWeight: 'bold',
+  },
+});
 
 export default MoodScreen;

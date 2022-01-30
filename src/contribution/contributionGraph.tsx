@@ -263,22 +263,7 @@ class ContributionGraph extends AbstractChart<ContributionGraphProps, Contributi
           y={y - this.props.borderSize}
           fill={this.getBorderColorForIndex(index)}
         />
-        <Rect
-          key={'blankcell' + index}
-          width={squareSize}
-          height={squareSize}
-          x={x + paddingLeft}
-          y={y}
-          fill={this.props.chartConfig.color(
-            mapValue(
-              0,
-              this.state.minValue,
-              this.state.maxValue,
-              0.15 + 0.05, // + 0.05 to make smaller values a bit more visible
-              1,
-            ),
-          )}
-        />
+        <Rect key={'blankcell' + index} width={squareSize} height={squareSize} x={x + paddingLeft} y={y} fill={'white'} />
         <Rect
           key={index}
           width={squareSize}

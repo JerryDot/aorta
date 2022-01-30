@@ -1,7 +1,9 @@
 import {NativeStackScreenProps} from '@react-navigation/native-stack';
 import moment from 'moment';
 import React, {useState} from 'react';
-import {Button, ScrollView, Text} from 'react-native';
+import {ScrollView, StyleSheet, Text, useWindowDimensions, View} from 'react-native';
+import {Grid, Col} from 'react-native-easy-grid';
+import {Button} from 'react-native-elements';
 import {RootStackParamList} from '../../App';
 import ContributionGraph from '../contribution';
 import {addActivityRecord, getActivityRecords} from '../database/activity';
@@ -15,6 +17,10 @@ export type activityColors = {
   alcohol: string;
   wfh: string;
   wfo: string;
+  'w+': string;
+  'w-': string;
+  'o+': string;
+  'o-': string;
 };
 
 const activityColorMap = {
@@ -25,13 +31,21 @@ const activityColorMap = {
   alcohol: 'black',
   wfh: 'orange',
   wfo: 'yellow',
+  'w+': 'black',
+  'w-': 'grey',
+  'o+': 'green',
+  'o-': 'red',
 };
 
 type Props = NativeStackScreenProps<RootStackParamList, 'Home'>;
 
 const ActivityScreen = ({navigation}: Props) => {
   const [dailyRecords, setDailyRecords] = useState(getActivityRecords(moment().startOf('day').toDate()));
-  const buttonOptions = ['sport', 'social', 'dating', 'study', 'alcohol', 'wfh', 'wfo'];
+  const {height, width} = useWindowDimensions();
+
+  const buttonOptions = ['sport', 'social', 'dating'];
+  const secondButtonOptions = ['study', 'o+', 'o-', 'alcohol'];
+  const thirdButtonOptions = ['wfh', 'wfo', 'w+', 'w-'];
 
   const refetchDailyRecords = () => {
     setDailyRecords(getActivityRecords(moment().startOf('day').toDate()));
@@ -48,7 +62,9 @@ const ActivityScreen = ({navigation}: Props) => {
   };
 
   const AddActivityButton = ({type}: {type: string}) => (
-    <Button key={type} title={`+ ${type} activitys`} onPress={() => addActivityRecordHandler(type)} />
+    <View style={{width: '30%', height: 50, justifyContent: 'center', flexWrap: 'wrap', flexDirection: 'row', flex: 1}}>
+      <Button buttonStyle={{height: 50, width: 80}} key={type} title={type} onPress={() => addActivityRecordHandler(type)} />
+    </View>
   );
 
   const commitsData = [
@@ -60,70 +76,89 @@ const ActivityScreen = ({navigation}: Props) => {
     {date: '2017-01-30', count: 2},
     {date: '2017-01-31', count: 3},
     {date: '2017-03-01', count: 2, activityType: 'sport'},
-    {date: '2017-04-02', count: 4, activityType: 'sport'},
-    {date: '2017-03-05', count: 2},
-    {date: '2017-02-30', count: 4},
+    {date: '2017-04-05', count: 4, activityType: 'sport'},
+    {date: '2022-01-01', count: 2},
+    {date: '2022-01-21', count: 4},
   ];
 
   const chartConfig = {
-    // backgroundGradientFrom: '#1E2923',
-    // backgroundGradientFromOpacity: 0,
-    // backgroundGradientTo: '#08130D',
-    // backgroundGradientToOpacity: 0.5,
-    color: (opacity = 1) => `rgba(26, 255, 146, ${opacity})`,
+    backgroundGradientFrom: '#FFFFFF',
+    backgroundGradientFromOpacity: 0,
+    backgroundGradientTo: '#FFFFFF',
+    backgroundGradientToOpacity: 0.5,
+    color: (opacity = 1) => `rgba(33, 150, 243, ${opacity})`,
     strokeWidth: 2, // optional, default 3
     barPercentage: 0.5,
     useShadowColorFromDataset: false, // optional
   };
 
   return (
-    <ScrollView>
+    <>
+      <View style={{height: 40}}>
+        <Grid>
+          <Col>
+            <Button title="Mood" onPress={() => navigation.navigate('Mood')} />
+          </Col>
+          <Col>
+            <Button title="Diet" onPress={() => navigation.navigate('Diet')} />
+          </Col>
+          <Col>
+            <Button title="Activity" onPress={() => navigation.navigate('Activity')} />
+          </Col>
+        </Grid>
+      </View>
       <Text>This is {dailyRecords.length} activities.</Text>
-      {buttonOptions.map(type => (
-        <AddActivityButton key={'aab' + type} type={type} />
-      ))}
+      <View style={{paddingTop: 10, flexDirection: 'row', flexWrap: 'wrap'}}>
+        {buttonOptions.map(type => (
+          <AddActivityButton key={'aab' + type} type={type} />
+        ))}
+      </View>
+      <View style={{paddingTop: 20, flexDirection: 'row', flexWrap: 'wrap'}}>
+        {secondButtonOptions.map(type => (
+          <AddActivityButton key={'aab' + type} type={type} />
+        ))}
+      </View>
+      <View style={{paddingTop: 20, flexDirection: 'row', flexWrap: 'wrap'}}>
+        {thirdButtonOptions.map(type => (
+          <AddActivityButton key={'aab' + type} type={type} />
+        ))}
+      </View>
       {dailyRecords.map(record => (
         <Text
+          style={styles.titleText}
           key={record.recordID}
-          onPress={() => deleteActivityRecordHandler(record.recordID)}>{`${record.date} ${record.type} ${record.recordID}`}</Text>
+          onPress={() => deleteActivityRecordHandler(record.recordID)}>{`${record.date.toDateString()} ${record.type} ${
+          record.recordID
+        }`}</Text>
       ))}
-      <ScrollView horizontal={true}>
-        <ContributionGraph
-          values={commitsData}
-          endDate={new Date('2017-04-05')}
-          numDays={100}
-          // width={screenWidth}
-          height={250}
-          width={600} // chartConfig={chartConfig}
-          tooltipDataAttrs={null}
-          chartConfig={chartConfig}
-          gutterSize={5}
-          borderSize={3}
-          showOutOfRangeDays={true}
-          activityColorMap={activityColorMap}
-        />
-      </ScrollView>
-      {/* <ContributionGraph
-        values={commitsData}
-        endDate={new Date('2021-05-01')}
-        width={335}
-        height={220}
-        borderSize={3}
-        chartConfig={{
-          backgroundGradientFrom: '#e2e2e2',
-          backgroundGradientTo: '#e2e2e2',
-          decimalPlaces: 2, // optional, defaults to 2dp
-          color: (opacity = 1) => `rgba(0, 0, 0, ${opacity})`,
-          labelColor: (opacity = 1) => `rgba(0, 0, 0, ${opacity})`,
-        }}
-        tooltipDataAttrs={null}
-        style={{
-          marginVertical: 10,
-          borderRadius: 10,
-        }}
-      /> */}
-    </ScrollView>
+      <View>
+        <ScrollView horizontal={true}>
+          <ContributionGraph
+            values={commitsData}
+            endDate={new Date('2022-01-25')}
+            numDays={77}
+            // width={screenWidth}
+            height={250}
+            width={width} // chartConfig={chartConfig}
+            tooltipDataAttrs={null}
+            chartConfig={chartConfig}
+            gutterSize={5}
+            borderSize={3}
+            showOutOfRangeDays={true}
+            activityColorMap={activityColorMap}
+          />
+        </ScrollView>
+      </View>
+    </>
   );
 };
+
+const styles = StyleSheet.create({
+  titleText: {
+    paddingTop: 10,
+    fontSize: 16,
+    fontWeight: 'bold',
+  },
+});
 
 export default ActivityScreen;
