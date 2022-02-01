@@ -1,5 +1,5 @@
 import {getGeneralDayRecords} from './general';
-import realm, {Activity, Calorie, Mood, Weight} from './realm';
+import {Activity, Calorie, Mood, Weight} from './realm';
 
 export type DaySummary = {
   day: Date;
@@ -7,6 +7,14 @@ export type DaySummary = {
   activities: string[];
   calories: number;
   weight?: number;
+};
+
+export type FullDay = {
+  day: Date;
+  moods: Mood['values'][];
+  activities: Activity['values'][];
+  calories: Calorie['values'][];
+  weight: Weight['values'][];
 };
 
 export const getDaySummary = (startOfDay: Date): DaySummary => {
@@ -20,22 +28,13 @@ export const getDaySummary = (startOfDay: Date): DaySummary => {
   return day;
 };
 
-export const getAllTimeSummary = (lastDay: Date): DaySummary[] => {
-  let moods = realm.objects<Mood>('Mood').sorted('date');
-  let activities = realm.objects<Activity>('Activity').sorted('date');
-  let calories = realm.objects<Calorie>('Calorie').sorted('date');
-  let weight = realm.objects<Weight>('Weight').sorted('date');
-  let firstDay: Date = lastDay;
-  [moods, activities, calories, weight].forEach(thing => {
-    if (thing[0].date < firstDay) {
-      let newDate = thing[0].date;
-      newDate.setHours(0, 0, 0, 0);
-      firstDay = newDate;
-    }
-  });
-  let dayResults: DaySummary[] = [];
-  for (let d = firstDay; d <= lastDay; d.setDate(d.getDate() + 1)) {
-    dayResults.push(getDaySummary(d));
-  }
-  return dayResults;
+export const getFullDay = (startOfDay: Date): FullDay => {
+  let day: FullDay = {
+    day: startOfDay,
+    moods: getGeneralDayRecords<Mood>('Mood', startOfDay).map(result => result.values),
+    activities: getGeneralDayRecords<Activity>('Activity', startOfDay).map(result => result.values),
+    calories: getGeneralDayRecords<Calorie>('Calorie', startOfDay).map(result => result.values),
+    weight: getGeneralDayRecords<Weight>('Weight', startOfDay).map(result => result.values),
+  };
+  return day;
 };

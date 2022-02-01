@@ -22,6 +22,16 @@ export class Mood {
   public comment: string | null;
   public recordID: string;
 
+  get values() {
+    return {
+      recordID: this.recordID,
+      rating: this.rating,
+      flavour: this.flavour,
+      comment: this.comment,
+      date: this.date,
+    };
+  }
+
   constructor(date: Date, rating: number, recordID: string, flavour: string | null, comment: string | null) {
     this.date = date;
     this.rating = rating;
@@ -46,6 +56,14 @@ export class Calorie {
   public amount: number;
   public recordID: string;
 
+  get values() {
+    return {
+      recordID: this.recordID,
+      amount: this.amount,
+      date: this.date,
+    };
+  }
+
   constructor(date: Date, amount: number, recordID: string) {
     this.date = date;
     this.amount = amount;
@@ -68,6 +86,14 @@ export class Weight {
   public amount: number;
   public recordID: string;
 
+  get values() {
+    return {
+      recordID: this.recordID,
+      amount: this.amount,
+      date: this.date,
+    };
+  }
+
   constructor(date: Date, amount: number, recordID: string) {
     this.date = date;
     this.amount = amount;
@@ -89,6 +115,14 @@ export class Activity {
   public date: Date;
   public type: string;
   public recordID: string;
+
+  get values() {
+    return {
+      recordID: this.recordID,
+      type: this.type,
+      date: this.date,
+    };
+  }
 
   constructor(date: Date, type: string, recordID: string) {
     this.date = date;

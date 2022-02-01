@@ -19,7 +19,7 @@ import HomeScreen from './src/screens/HomeScreen';
 import DietScreen from './src/screens/DietScreen';
 import MoodScreen from './src/screens/MoodScreen';
 import ActivityScreen from './src/screens/ActivityScreen';
-import realm from './src/database/realm';
+import DataScreen from './src/screens/DataScreen';
 
 const Stack = createNativeStackNavigator<RootStackParamList>();
 
@@ -29,7 +29,7 @@ export type RootStackParamList = {
   Diet: undefined;
   Mood: undefined;
   Activity: undefined;
-  // Feed: { sort: 'latest' | 'top' } | undefined;
+  Data: undefined;
 };
 
 const App = () => {
@@ -47,6 +47,7 @@ const App = () => {
           <Stack.Screen name="Diet" component={DietScreen} />
           <Stack.Screen name="Mood" component={MoodScreen} />
           <Stack.Screen name="Activity" component={ActivityScreen} />
+          <Stack.Screen name="Data" component={DataScreen} />
         </Stack.Navigator>
       </NavigationContainer>
       {/* <SafeAreaView style={backgroundStyle}>

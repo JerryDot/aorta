@@ -64,14 +64,9 @@ class ContributionGraph extends AbstractChart<ContributionGraphProps, Contributi
   }
 
   getBorderColorForIndex(index: number) {
-    console.log(index);
-    console.log(this.props.activityColorMap);
-    console.log(this.state.valueCache[index]);
     if (this.state.valueCache[index]) {
       if (this.state.valueCache[index].value) {
-        console.log(this.state.valueCache[index].value);
         const activityType = this.state.valueCache[index].value['activityType'];
-        console.log(activityType);
         if (activityType) {
           return this.props.activityColorMap[activityType];
         }
