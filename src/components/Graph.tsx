@@ -4,6 +4,8 @@ import {Grid} from 'react-native-easy-grid';
 import {YAxis, XAxis, LineChart} from 'react-native-svg-charts';
 import * as scale from 'd3-scale';
 import * as dateFns from 'date-fns';
+import * as shape from 'd3-shape';
+import {Circle} from 'react-native-svg';
 
 type lineColors = ['purple', 'green', 'blue', 'red'];
 
@@ -36,7 +38,7 @@ const Graph = ({one, two, day}: {one: GraphInput; two: GraphInput; day: boolean}
   //     date: dateFns.setHours(new Date(2018, 0, 0), 24),
   //   },
   // ];
-  const secondLineData = [1, 2, 3, 4, 5, 6];
+  const secondLineData = [1, 2, 3, 3, 5, 6];
   const fullData = [
     {
       data: firstLineData,
@@ -49,7 +51,11 @@ const Graph = ({one, two, day}: {one: GraphInput; two: GraphInput; day: boolean}
   ];
 
   const contentInset = {top: 20, bottom: 20};
-
+  //@ts-ignore
+  const Decorator = ({x, y, data}) => {
+    //@ts-ignore
+    return data.map((value, index) => <Circle key={index} cx={x(index)} cy={y(value)} r={4} stroke={'rgb(134, 65, 244)'} fill={'white'} />);
+  };
   return (
     <>
       <View style={{height: width, flexDirection: 'row'}}>
@@ -68,14 +74,17 @@ const Graph = ({one, two, day}: {one: GraphInput; two: GraphInput; day: boolean}
             style={{height: width}}
             svg={{fill: 'none', stroke: 'rgb(134, 65, 244)'}}
             data={firstLineData}
-            contentInset={contentInset}>
+            contentInset={contentInset}
+            curve={shape.curveBumpX}>
+            <Decorator />
             <Grid />
           </LineChart>
           <LineChart
             style={StyleSheet.absoluteFill}
             svg={{fill: 'none', stroke: 'rgb(134, 65, 244)'}}
             data={secondLineData}
-            contentInset={contentInset}>
+            contentInset={contentInset}
+            xScale={scale.scaleTime}>
             <Grid />
           </LineChart>
         </View>
