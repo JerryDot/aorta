@@ -63,20 +63,14 @@ const Graph = ({one, two, day}: {one: GraphInput; two: GraphInput; day: boolean}
           min={0}
           // numberOfTicks={10}
         />
-        <View style={{marginLeft: 10}}>
+        <View style={{marginLeft: 10, width: '85%', height: width}}>
           <LineChart style={{height: width}} data={fullData} contentInset={contentInset}>
             <Grid />
           </LineChart>
-          <XAxis
-            style={{marginHorizontal: -10, height: width}}
-            data={secondLineData}
-            scale={scale.scaleTime}
-            svg={{fontSize: 12, fill: 'black'}}
-            // xAccessor={({item}) => item.date}
-            formatLabel={index => index}
-            // formatLabel={day ? value => dateFns.format(value, 'HH') : value => dateFns.format(value, 'HH')}
-          />
         </View>
+        {/* <LineChart style={{height: width, position: 'absolute'}} data={secondLineData} contentInset={contentInset}>
+            <Grid />
+          </LineChart> */}
         <YAxis
           style={{marginHorizontal: 3, height: width}}
           formatLabel={value => value}
@@ -86,6 +80,15 @@ const Graph = ({one, two, day}: {one: GraphInput; two: GraphInput; day: boolean}
           numberOfTicks={10}
         />
       </View>
+      <XAxis
+        style={{marginHorizontal: -10, height: width}}
+        data={secondLineData}
+        scale={scale.scaleTime}
+        svg={{fontSize: 12, fill: 'black'}}
+        // xAccessor={({item}) => item.date}
+        formatLabel={index => index}
+        // formatLabel={day ? value => dateFns.format(value, 'HH') : value => dateFns.format(value, 'HH')}
+      />
     </>
   );
 };
