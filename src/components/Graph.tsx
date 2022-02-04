@@ -1,5 +1,5 @@
 import React from 'react';
-import {useWindowDimensions, View} from 'react-native';
+import {StyleSheet, useWindowDimensions, View} from 'react-native';
 import {Grid} from 'react-native-easy-grid';
 import {YAxis, XAxis, LineChart} from 'react-native-svg-charts';
 import * as scale from 'd3-scale';
@@ -17,7 +17,7 @@ export type GraphInput = {
 
 const Graph = ({one, two, day}: {one: GraphInput; two: GraphInput; day: boolean}) => {
   const {height, width} = useWindowDimensions();
-  const firstLineData = [50, 10, 40, 95, -4, -24];
+  const firstLineData = [2, 34, 5, 22, 6, 6];
   // const firstLineData = [
   //   {
   //     value: 150,
@@ -64,7 +64,18 @@ const Graph = ({one, two, day}: {one: GraphInput; two: GraphInput; day: boolean}
           // numberOfTicks={10}
         />
         <View style={{marginLeft: 10, width: '85%', height: width}}>
-          <LineChart style={{height: width}} data={fullData} contentInset={contentInset}>
+          <LineChart
+            style={{height: width}}
+            svg={{fill: 'none', stroke: 'rgb(134, 65, 244)'}}
+            data={firstLineData}
+            contentInset={contentInset}>
+            <Grid />
+          </LineChart>
+          <LineChart
+            style={StyleSheet.absoluteFill}
+            svg={{fill: 'none', stroke: 'rgb(134, 65, 244)'}}
+            data={secondLineData}
+            contentInset={contentInset}>
             <Grid />
           </LineChart>
         </View>
