@@ -1,14 +1,22 @@
 import {NativeStackScreenProps} from '@react-navigation/native-stack';
-import React from 'react';
-import {Button} from 'react-native';
+import React, {useEffect, useState} from 'react';
+import {Button, View} from 'react-native';
 import {Col, Grid} from 'react-native-easy-grid';
 import {RootStackParamList} from '../../App';
 import {ScrollView} from 'react-native-gesture-handler';
-import Graph from '../components/Graph';
+import {GraphWrapper} from '../components/Graph';
+import {useIsFocused} from '@react-navigation/core';
 
 type Props = NativeStackScreenProps<RootStackParamList, 'Home'>;
 
 const HomeScreen = ({navigation}: Props) => {
+  const [key, setKey] = useState(1);
+  const isFocused = useIsFocused();
+
+  useEffect(() => {
+    setKey(key + 1);
+  }, [isFocused]);
+
   return (
     <>
       <ScrollView>
@@ -26,7 +34,9 @@ const HomeScreen = ({navigation}: Props) => {
             <Button title="Data" onPress={() => navigation.navigate('Data')} />
           </Col>
         </Grid>
-        <Graph />
+        <View key={key}>
+          <GraphWrapper oneKey={'Mood'} twoKey={'Calorie'} timespan={'week'} />
+        </View>
       </ScrollView>
     </>
   );
