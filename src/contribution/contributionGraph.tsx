@@ -2,6 +2,7 @@ import _ from 'lodash';
 import React from 'react';
 import {View} from 'react-native';
 import {G, Rect, RectProps, Svg, Text} from 'react-native-svg';
+import {v4 as uuidv4} from 'uuid';
 
 import AbstractChart from './abstractChart';
 import {convertToDate, getBeginningTimeForDate, shiftDate} from './dateHelpers';
@@ -251,16 +252,16 @@ class ContributionGraph extends AbstractChart<ContributionGraphProps, Contributi
     return (
       <>
         <Rect
-          key={'outerborder' + index}
+          key={uuidv4() + index}
           width={squareSize + 2 * this.props.borderSize}
           height={squareSize + 2 * this.props.borderSize}
           x={x + paddingLeft - this.props.borderSize}
           y={y - this.props.borderSize}
           fill={this.getBorderColorForIndex(index)}
         />
-        <Rect key={'blankcell' + index} width={squareSize} height={squareSize} x={x + paddingLeft} y={y} fill={'white'} />
+        <Rect key={uuidv4() + index} width={squareSize} height={squareSize} x={x + paddingLeft} y={y} fill={'white'} />
         <Rect
-          key={index}
+          key={uuidv4() + index}
           width={squareSize}
           height={squareSize}
           x={x + paddingLeft}
@@ -293,7 +294,7 @@ class ContributionGraph extends AbstractChart<ContributionGraphProps, Contributi
   renderWeek(weekIndex: number) {
     const [x, y] = this.getTransformForWeek(weekIndex);
     return (
-      <G key={weekIndex} x={x} y={y}>
+      <G key={'this is a week' + weekIndex} x={x} y={y}>
         {_.range(DAYS_IN_WEEK).map(dayIndex => this.renderSquare(dayIndex, weekIndex * DAYS_IN_WEEK + dayIndex))}
       </G>
     );
@@ -316,7 +317,7 @@ class ContributionGraph extends AbstractChart<ContributionGraphProps, Contributi
       const [x, y] = this.getMonthLabelCoordinates(weekIndex);
 
       return endOfWeek.getDate() >= 1 && endOfWeek.getDate() <= DAYS_IN_WEEK ? (
-        <Text key={weekIndex} x={x + paddingLeft} y={y + 8} {...this.getPropsForLabels()}>
+        <Text key={'week' + weekIndex} x={x + paddingLeft} y={y + 8} {...this.getPropsForLabels()}>
           {this.props.getMonthLabel ? this.props.getMonthLabel(endOfWeek.getMonth()) : MONTH_LABELS[endOfWeek.getMonth()]}
         </Text>
       ) : null;
@@ -355,8 +356,8 @@ class ContributionGraph extends AbstractChart<ContributionGraphProps, Contributi
             ...this.props.chartConfig,
           })}
           <Rect width="100%" height={this.props.height} rx={borderRadius} ry={borderRadius} fill="url(#backgroundGradient)" />
-          <G>{this.renderMonthLabels()}</G>
-          <G>{this.renderAllWeeks()}</G>
+          <G key="asdglkn">{this.renderMonthLabels()}</G>
+          <G key="saf">{this.renderAllWeeks()}</G>
         </Svg>
       </View>
     );

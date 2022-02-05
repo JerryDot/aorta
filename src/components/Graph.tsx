@@ -1,11 +1,11 @@
 import React from 'react';
 import {StyleSheet, useWindowDimensions, View} from 'react-native';
-import {Grid} from 'react-native-easy-grid';
-import {YAxis, XAxis, LineChart} from 'react-native-svg-charts';
+import {YAxis, XAxis, LineChart, Grid} from 'react-native-svg-charts';
 import * as scale from 'd3-scale';
 import * as dateFns from 'date-fns';
 import * as shape from 'd3-shape';
-import {Circle} from 'react-native-svg';
+import {Circle, G, Line} from 'react-native-svg';
+import {RecordString} from '../database/realm';
 
 type lineColors = ['purple', 'green', 'blue', 'red'];
 
@@ -17,28 +17,67 @@ export type GraphInput = {
   numberOfTicks: number;
 };
 
+export type Timespan = 'day' | 'week' | 'month' | 'all';
+
+type GraphWrapperProps = {one: RecordString; two: RecordString; timespan: Timespan};
+
+const GraphWrapper = ({oneKey, twoKey, timespan}: GraphWrapperProps) => {};
+
 const Graph = ({one, two, day}: {one: GraphInput; two: GraphInput; day: boolean}) => {
   const {height, width} = useWindowDimensions();
   const firstLineData = [2, 34, 5, 22, 6, 6];
-  // const firstLineData = [
-  //   {
-  //     value: 150,
-  //     date: dateFns.setHours(new Date(2018, 0, 0), 15),
-  //   },
-  //   {
-  //     value: 10,
-  //     date: dateFns.setHours(new Date(2018, 0, 0), 18),
-  //   },
-  //   {
-  //     value: 100,
-  //     date: dateFns.setHours(new Date(2018, 0, 0), 21),
-  //   },
-  //   {
-  //     value: 20,
-  //     date: dateFns.setHours(new Date(2018, 0, 0), 24),
-  //   },
-  // ];
+  const thirdLineData = [
+    {
+      value: 150,
+      date: new Date(2018, 1, 1),
+    },
+    {
+      value: 10,
+      date: new Date(2018, 1, 4),
+    },
+    {
+      value: 100,
+      date: new Date(2018, 1, 9),
+    },
+    {
+      value: 20,
+      date: new Date(2018, 1, 11),
+    },
+    {
+      value: 150,
+      date: new Date(2018, 1, 18),
+    },
+    {
+      value: 10,
+      date: new Date(2018, 1, 21),
+    },
+    {
+      value: 100,
+      date: new Date(2018, 1, 25),
+    },
+    {
+      value: 20,
+      date: new Date(2018, 1, 29),
+    },
+  ];
   const secondLineData = [1, 2, 3, 3, 5, 6];
+
+  const CustomGrid = ({x, y, data, ticks}) => (
+    <G>
+      {
+        // Horizontal grid
+        ticks.map(tick => (
+          <Line key={tick} x1={'0%'} x2={'100%'} y1={y(tick)} y2={y(tick)} stroke={'rgba(0,0,0,0.2)'} />
+        ))
+      }
+      {
+        // Vertical grid
+        data.map((_, index) => (
+          <Line key={index} y1={'0%'} y2={'100%'} x1={x(index)} x2={x(index)} stroke={'rgba(0,0,0,0.2)'} />
+        ))
+      }
+    </G>
+  );
   const fullData = [
     {
       data: firstLineData,
@@ -54,13 +93,13 @@ const Graph = ({one, two, day}: {one: GraphInput; two: GraphInput; day: boolean}
   //@ts-ignore
   const Decorator = ({x, y, data}) => {
     //@ts-ignore
-    return data.map((value, index) => <Circle key={index} cx={x(index)} cy={y(value)} r={4} stroke={'rgb(134, 65, 244)'} fill={'white'} />);
+    return data.map((value, index) => <Circle key={index} cx={x(index)} cy={y(value)} r={3} stroke={'rgb(134, 65, 244)'} fill={'white'} />);
   };
   return (
     <>
       <View style={{height: width, flexDirection: 'row'}}>
         <YAxis
-          style={{marginHorizontal: 3, height: width}}
+          style={{height: width}}
           formatLabel={value => value}
           contentInset={contentInset}
           svg={{fontSize: 12, fill: 'black'}}
@@ -69,7 +108,7 @@ const Graph = ({one, two, day}: {one: GraphInput; two: GraphInput; day: boolean}
           min={0}
           // numberOfTicks={10}
         />
-        <View style={{marginLeft: 10, width: '85%', height: width}}>
+        <View style={{width: '87%', height: width}}>
           <LineChart
             style={{height: width}}
             svg={{fill: 'none', stroke: 'rgb(134, 65, 244)'}}
@@ -77,16 +116,33 @@ const Graph = ({one, two, day}: {one: GraphInput; two: GraphInput; day: boolean}
             contentInset={contentInset}
             curve={shape.curveBumpX}>
             <Decorator />
-            <Grid />
+            <CustomGrid belowChart={true} />
           </LineChart>
           <LineChart
             style={StyleSheet.absoluteFill}
             svg={{fill: 'none', stroke: 'rgb(134, 65, 244)'}}
-            data={secondLineData}
+            data={thirdLineData}
+            xAccessor={({item}) => item.date}
+            yAccessor={({item}) => item.value}
             contentInset={contentInset}
             xScale={scale.scaleTime}>
-            <Grid />
+            <Grid direction={Grid.Direction.VERTICAL} />
           </LineChart>
+          <XAxis
+            style={{
+              width: '100%',
+              bottom: 10,
+            }}
+            data={thirdLineData}
+            xAccessor={({item}) => item.date}
+            scale={scale.scaleTime}
+            contentInset={contentInset}
+            svg={{fontSize: 12, fill: 'black'}}
+            // xAccessor={({item}) => item.date}
+            numberOfTicks={6}
+            formatLabel={value => dateFns.format(value, 'MM:dd')}
+            // formatLabel={day ? value => dateFns.format(value, 'HH') : value => dateFns.format(value, 'HH')}
+          />
         </View>
         {/* <LineChart style={{height: width, position: 'absolute'}} data={secondLineData} contentInset={contentInset}>
             <Grid />
@@ -97,18 +153,11 @@ const Graph = ({one, two, day}: {one: GraphInput; two: GraphInput; day: boolean}
           contentInset={contentInset}
           svg={{fontSize: 12, fill: 'black'}}
           data={firstLineData}
+          max={2400}
+          min={0}
           numberOfTicks={10}
         />
       </View>
-      <XAxis
-        style={{marginHorizontal: -10, height: width}}
-        data={secondLineData}
-        scale={scale.scaleTime}
-        svg={{fontSize: 12, fill: 'black'}}
-        // xAccessor={({item}) => item.date}
-        formatLabel={index => index}
-        // formatLabel={day ? value => dateFns.format(value, 'HH') : value => dateFns.format(value, 'HH')}
-      />
     </>
   );
 };

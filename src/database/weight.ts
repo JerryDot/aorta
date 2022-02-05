@@ -1,6 +1,13 @@
-import {getGeneralRecentRecord} from './general';
+import {getGeneralRecentRecord, getGeneralRecordsPeriod} from './general';
 import realm, {Weight} from './realm';
 import {v4 as uuidv4} from 'uuid';
+
+export const getWeightRecords = (startDay: Date): Realm.Results<Weight> => {
+  // Should be given the start of a day at 1200 am
+  const endDay = new Date(startDay);
+  endDay.setDate(startDay.getDate() + 1);
+  return getGeneralRecordsPeriod<Weight>('Weight', startDay, endDay);
+};
 
 export const addWeightRecord = (weight: number) => {
   const possiblePrevRecord = getGeneralRecentRecord<Weight>('Weight');

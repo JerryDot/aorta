@@ -10,7 +10,7 @@ export const getFirstDay = (): Date => {
   let weight = realm.objects<Weight>('Weight').sorted('date');
   let firstDay: Date = moods[0].date;
   [activities, calories, weight].forEach(thing => {
-    if (thing[0].date < firstDay) {
+    if (thing[0] && thing[0].date < firstDay) {
       let newDate = thing[0].date;
       newDate.setHours(0, 0, 0, 0);
       firstDay = newDate;
@@ -28,7 +28,7 @@ export const getAllDaysSummary = (lastDay: Date): DaySummary[] => {
   return dayResults;
 };
 
-export const getAllData = (lastDay: Date): FullData => {
+export const getAllData = (): FullData => {
   let firstDay: Date = getFirstDay();
   let dayFullResults = [];
   for (let d = firstDay; d <= new Date(); d.setDate(d.getDate() + 1)) {

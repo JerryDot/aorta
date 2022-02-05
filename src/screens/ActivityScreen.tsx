@@ -134,6 +134,7 @@ const ActivityScreen = ({navigation}: Props) => {
       <View>
         <ScrollView horizontal={true}>
           <ContributionGraph
+            key={'sadfasf'}
             values={commitsData}
             endDate={new Date('2022-01-25')}
             numDays={77}

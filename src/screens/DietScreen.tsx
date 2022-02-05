@@ -1,22 +1,29 @@
 import {NativeStackScreenProps} from '@react-navigation/native-stack';
 import moment from 'moment';
 import React, {useState} from 'react';
-import {StyleSheet, Text, View} from 'react-native';
+import {StyleSheet, Text, TextInput, View} from 'react-native';
 import {Grid, Col, Row} from 'react-native-easy-grid';
 import {Button} from 'react-native-elements';
 import {RootStackParamList} from '../../App';
 import {addCalorieRecord, getCalorieRecords} from '../database/calorie';
 import {deleteRecord} from '../database/general';
+import {addWeightRecord, getWeightRecords} from '../database/weight';
 
 type Props = NativeStackScreenProps<RootStackParamList, 'Home'>;
 
 const DietScreen = ({navigation}: Props) => {
   const [dailyRecords, setDailyRecords] = useState(getCalorieRecords(moment().startOf('day').toDate()));
+  const [dailyWeightRecords, setDailyWeightRecords] = useState(getWeightRecords(moment().startOf('day').toDate()));
   const buttonOptions = [25, 50, 100];
   const secondButtonOptions = [200, 400, 1000];
+  const [text, setText] = useState<string>('');
 
   const refetchDailyRecords = () => {
     setDailyRecords(getCalorieRecords(moment().startOf('day').toDate()));
+  };
+
+  const refetchDailyWeightRecords = () => {
+    setDailyWeightRecords(getWeightRecords(moment().startOf('day').toDate()));
   };
 
   const addCalorieRecordHandler = (amount: number) => {
@@ -27,6 +34,16 @@ const DietScreen = ({navigation}: Props) => {
   const deleteCalorieRecordHandler = (recordId: string) => {
     deleteRecord('Calorie', recordId);
     refetchDailyRecords();
+  };
+
+  const addWeightRecordHandler = (amount: string) => {
+    addWeightRecord(Number(amount));
+    refetchDailyWeightRecords();
+  };
+
+  const deleteWeightRecordHandler = (recordId: string) => {
+    deleteRecord('Weight', recordId);
+    refetchDailyWeightRecords();
   };
 
   const stringFromAmount = (amount: number): string => {
@@ -66,23 +83,38 @@ const DietScreen = ({navigation}: Props) => {
           </Col>
         </Grid>
       </View>
-      <Text>This is {dailyRecords.sum('amount')}</Text>
-      <View style={{paddingTop: 10, flexDirection: 'row', flexWrap: 'wrap'}}>
-        {buttonOptions.map(amount => (
-          <AddCalorieButton key={'acb' + amount} amount={amount} />
+      <View style={{justifyContent: 'space-between'}}>
+        <Text>This is {dailyRecords.sum('amount')}</Text>
+        <View style={{paddingTop: 10, flexDirection: 'row', flexWrap: 'wrap'}}>
+          {buttonOptions.map(amount => (
+            <AddCalorieButton key={'acb' + amount} amount={amount} />
+          ))}
+        </View>
+        <View style={{paddingTop: 20, flexDirection: 'row', flexWrap: 'wrap'}}>
+          {secondButtonOptions.map(amount => (
+            <AddCalorieButton key={'acb' + amount} amount={amount} />
+          ))}
+        </View>
+        {dailyRecords.map(record => (
+          <Text
+            style={styles.titleText}
+            key={record.recordID}
+            onPress={() => deleteCalorieRecordHandler(record.recordID)}>{`${record.date} ${record.amount} ${record.recordID}`}</Text>
         ))}
-      </View>
-      <View style={{paddingTop: 20, flexDirection: 'row', flexWrap: 'wrap'}}>
-        {secondButtonOptions.map(amount => (
-          <AddCalorieButton key={'acb' + amount} amount={amount} />
+        {dailyWeightRecords.map(record => (
+          <Text
+            style={styles.titleText}
+            key={record.recordID}
+            onPress={() => deleteWeightRecordHandler(record.recordID)}>{`${record.date} ${record.amount} ${record.recordID}`}</Text>
         ))}
+        <TextInput
+          style={{height: 80, marginTop: 'auto'}}
+          placeholder="Type here to translate!"
+          onChangeText={newText => setText(newText)}
+          defaultValue={text}
+        />
+        <Button title="Enter Weight" onPress={() => addWeightRecordHandler(text)} />
       </View>
-      {dailyRecords.map(record => (
-        <Text
-          style={styles.titleText}
-          key={record.recordID}
-          onPress={() => deleteCalorieRecordHandler(record.recordID)}>{`${record.date} ${record.amount} ${record.recordID}`}</Text>
-      ))}
     </>
   );
 };
