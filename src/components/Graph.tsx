@@ -1,29 +1,104 @@
-import React from 'react';
+import React, {useState} from 'react';
 import {StyleSheet, useWindowDimensions, View} from 'react-native';
 import {YAxis, XAxis, LineChart, Grid} from 'react-native-svg-charts';
 import * as scale from 'd3-scale';
 import * as dateFns from 'date-fns';
 import * as shape from 'd3-shape';
 import {Circle, G, Line} from 'react-native-svg';
-import {RecordString} from '../database/realm';
+import {Calorie, Mood, RecordString, Weight} from '../database/realm';
+import {getFirstDay} from '../database/fullData';
+import {getGeneralRecordsPeriod, getGraphDataPeriod} from '../database/general';
 
 type lineColors = ['purple', 'green', 'blue', 'red'];
 
+export type LineData = {date: Date; value: number}[];
+
 export type GraphInput = {
-  lineData: {date: Date; value: number}[];
+  lineData: LineData;
   lineColor: string;
   max: number;
   min: number;
   numberOfTicks: number;
 };
 
+const CalorieGraphConfig = (startDate: Date): GraphInput => {
+  let graphData = {} as GraphInput;
+  graphData.lineData = getGeneralRecordsPeriod<Calorie>('Calorie', startDate).map(record => ({
+    date: record.date,
+    value: record.amount,
+  }));
+  graphData.min = 0;
+  graphData.max = Math.max(...graphData.lineData.map(point => point.value)) + 100;
+  graphData.lineColor = 'green';
+  graphData.numberOfTicks = 10;
+  return graphData;
+};
+
+const MoodGraphConfig = (startDate: Date): GraphInput => {
+  let graphData = {} as GraphInput;
+  graphData.lineData = getGeneralRecordsPeriod<Mood>('Mood', startDate).map(record => ({
+    date: record.date,
+    value: record.rating,
+  }));
+  graphData.min = 0;
+  graphData.max = 10;
+  graphData.lineColor = 'blue';
+  graphData.numberOfTicks = 10;
+  return graphData;
+};
+
+const WeightGraphConfig = (startDate: Date): GraphInput => {
+  let graphData = {} as GraphInput;
+  graphData.lineData = getGeneralRecordsPeriod<Weight>('Weight', startDate).map(record => ({
+    date: record.date,
+    value: record.amount,
+  }));
+  graphData.min = Math.min(...graphData.lineData.map(point => point.value)) - 3;
+  graphData.max = Math.max(...graphData.lineData.map(point => point.value)) + 3;
+  graphData.lineColor = 'red';
+  graphData.numberOfTicks = 10;
+  return graphData;
+};
+
 export type Timespan = 'day' | 'week' | 'month' | 'all';
 
-type GraphWrapperProps = {one: RecordString; two: RecordString; timespan: Timespan};
+type GraphWrapperProps = {oneKey: RecordString; twoKey: RecordString; timespan: Timespan};
 
-const GraphWrapper = ({oneKey, twoKey, timespan}: GraphWrapperProps) => {};
+const timespanToStartDate = (timespan: Timespan): Date => {
+  let startDay = new Date();
+  if (timespan == 'day') {
+    startDay.setDate(startDay.getDate() - 1);
+  } else if (timespan == 'month') {
+    startDay.setDate(startDay.getDate() - 30);
+  } else if (timespan == 'week') {
+    startDay.setDate(startDay.getDate() - 7);
+  } else {
+    startDay = getFirstDay();
+  }
+  return startDay;
+};
 
-const Graph = ({one, two, day}: {one: GraphInput; two: GraphInput; day: boolean}) => {
+const GraphWrapper = ({oneKey, twoKey, timespan}: GraphWrapperProps) => {
+  // Note this uses a database call sometimes so might slow down graph load
+  const [startDate, setStartDate] = useState<Date>(timespanToStartDate(timespan));
+
+  const keyToInput = (key: RecordString): GraphInput => {
+    switch (key) {
+      case 'Mood':
+        return MoodGraphConfig(startDate);
+      case 'Calorie':
+        return CalorieGraphConfig(startDate);
+      case 'Weight':
+        return WeightGraphConfig(startDate);
+      case 'Activity':
+        throw 'Wow very active graph';
+    }
+  };
+
+  return <Graph one={keyToInput(oneKey)} two={keyToInput(twoKey)} />;
+};
+
+const Graph = ({one, two}: {one: GraphInput; two: GraphInput}) => {
   const {height, width} = useWindowDimensions();
   const firstLineData = [2, 34, 5, 22, 6, 6];
   const thirdLineData = [
