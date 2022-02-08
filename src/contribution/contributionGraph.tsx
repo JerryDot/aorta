@@ -295,13 +295,15 @@ class ContributionGraph extends AbstractChart<ContributionGraphProps, Contributi
     const [x, y] = this.getTransformForWeek(weekIndex);
     return (
       <G key={'this is a week' + weekIndex} x={x} y={y}>
-        {_.range(DAYS_IN_WEEK).map(dayIndex => this.renderSquare(dayIndex, weekIndex * DAYS_IN_WEEK + dayIndex))}
+        {_.range(DAYS_IN_WEEK).map(dayIndex => (
+          <View key={uuidv4()}>{this.renderSquare(dayIndex, weekIndex * DAYS_IN_WEEK + dayIndex)}</View>
+        ))}
       </G>
     );
   }
 
   renderAllWeeks() {
-    return _.range(this.getWeekCount()).map(weekIndex => this.renderWeek(weekIndex));
+    return _.range(this.getWeekCount()).map(weekIndex => <View key={uuidv4()}>{this.renderWeek(weekIndex)}</View>);
   }
 
   renderMonthLabels() {

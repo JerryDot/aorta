@@ -1,22 +1,23 @@
 import React, {useEffect, useState} from 'react';
 import {StyleSheet, useWindowDimensions, View} from 'react-native';
+import {Button} from 'react-native-elements';
 import {YAxis, XAxis, LineChart, Grid} from 'react-native-svg-charts';
 import * as scale from 'd3-scale';
 import * as dateFns from 'date-fns';
 import * as shape from 'd3-shape';
 import {Circle, G, Line} from 'react-native-svg';
 import {Calorie, Mood, RecordString, Weight} from '../database/realm';
-import {getFirstDay} from '../database/fullData';
+import {getAllDaysSummary, getFirstDay} from '../database/fullData';
 import {getGeneralRecordsPeriod, getGraphDataPeriod} from '../database/general';
 import {useIsFocused} from '@react-navigation/core';
 
-type lineColors = ['purple', 'green', 'blue', 'red'];
+type lineColors = 'purple' | 'green' | 'blue' | 'red';
 
 export type LineData = {date: Date; value: number}[];
 
 export type GraphInput = {
   lineData: LineData;
-  lineColor: string;
+  lineColor: lineColors;
   max: number;
   min: number;
   numberOfTicks: number;
@@ -24,10 +25,12 @@ export type GraphInput = {
 
 const CalorieGraphConfig = (startDate: Date): GraphInput => {
   let graphData = {} as GraphInput;
-  graphData.lineData = getGeneralRecordsPeriod<Calorie>('Calorie', startDate).map(record => ({
-    date: record.date,
-    value: record.amount,
+  graphData.lineData = getAllDaysSummary(new Date(), new Date(startDate)).map(record => ({
+    date: record.day,
+    value: record.calories,
   }));
+  console.log(graphData.lineData);
+  graphData.lineData.sort((a, b) => a.date.getTime() - b.date.getTime());
   graphData.min = 0;
   graphData.max = Math.max(...graphData.lineData.map(point => point.value)) + 100;
   graphData.lineColor = 'green';
@@ -52,10 +55,12 @@ const MoodGraphConfig = (startDate: Date): GraphInput => {
 
 const WeightGraphConfig = (startDate: Date): GraphInput => {
   let graphData = {} as GraphInput;
-  graphData.lineData = getGeneralRecordsPeriod<Weight>('Weight', startDate).map(record => ({
-    date: record.date,
-    value: record.amount,
-  }));
+  graphData.lineData = getGeneralRecordsPeriod<Weight>('Weight', startDate)
+    .map(record => ({
+      date: record.date,
+      value: record.amount,
+    }))
+    .sort((a, b) => a.date.getTime() - b.date.getTime());
   graphData.min = Math.min(...graphData.lineData.map(point => point.value)) - 3;
   graphData.max = Math.max(...graphData.lineData.map(point => point.value)) + 3;
   graphData.lineColor = 'red';
@@ -63,28 +68,9 @@ const WeightGraphConfig = (startDate: Date): GraphInput => {
   return graphData;
 };
 
-export type Timespan = 'day' | 'week' | 'month' | 'all';
+type GraphWrapperProps = {oneKey: RecordString; twoKey: RecordString; startDate: Date};
 
-type GraphWrapperProps = {oneKey: RecordString; twoKey: RecordString; timespan: Timespan};
-
-const timespanToStartDate = (timespan: Timespan): Date => {
-  let startDay = new Date();
-  if (timespan == 'day') {
-    startDay.setDate(startDay.getDate() - 1);
-  } else if (timespan == 'month') {
-    startDay.setDate(startDay.getDate() - 30);
-  } else if (timespan == 'week') {
-    startDay.setDate(startDay.getDate() - 7);
-  } else {
-    startDay = getFirstDay();
-  }
-  return startDay;
-};
-
-export const GraphWrapper = ({oneKey, twoKey, timespan}: GraphWrapperProps) => {
-  // Note this uses a database call sometimes so might slow down graph load
-  const [startDate, setStartDate] = useState<Date>(timespanToStartDate(timespan));
-  console.log(startDate);
+export const GraphWrapper = ({oneKey, twoKey, startDate}: GraphWrapperProps) => {
   const keyToInput = (key: RecordString): GraphInput => {
     switch (key) {
       case 'Mood':
@@ -98,7 +84,13 @@ export const GraphWrapper = ({oneKey, twoKey, timespan}: GraphWrapperProps) => {
     }
   };
 
-  return <Graph one={keyToInput(oneKey)} two={keyToInput(twoKey)} />;
+  return (
+    <>
+      <View style={{flexDirection: 'row'}}>
+        <Graph one={oneKey ? keyToInput(oneKey) : keyToInput(oneKey)} two={twoKey ? keyToInput(twoKey) : keyToInput(twoKey)} />
+      </View>
+    </>
+  );
 };
 
 const Graph = ({one, two}: {one: GraphInput; two: GraphInput}) => {
@@ -119,8 +111,8 @@ const Graph = ({one, two}: {one: GraphInput; two: GraphInput}) => {
       }
       {
         // Vertical grid
-        data.map((_, index) => (
-          <Line key={index} y1={'0%'} y2={'100%'} x1={x(index)} x2={x(index)} stroke={'rgba(0,0,0,0.2)'} />
+        data.map((value, index) => (
+          <Line key={index} y1={'0%'} y2={'100%'} x1={x(value.date)} x2={x(value.date)} stroke={'rgba(0,0,0,0.2)'} />
         ))
       }
     </G>
@@ -128,8 +120,8 @@ const Graph = ({one, two}: {one: GraphInput; two: GraphInput}) => {
 
   const contentInset = {top: 20, bottom: 20};
 
-  const Decorator = ({x, y, data}) => {
-    return data.map((value, index) => <Circle key={index} cx={x(index)} cy={y(value.value)} r={3} stroke={one.lineColor} fill={'white'} />);
+  const Decorator = ({x, y, data, color}) => {
+    return data.map((value, index) => <Circle key={index} cx={x(value.date)} cy={y(value.value)} r={3} stroke={color} fill={'white'} />);
   };
 
   return (
@@ -161,7 +153,7 @@ const Graph = ({one, two}: {one: GraphInput; two: GraphInput}) => {
             yScale={scale.scaleLinear}
             xScale={scale.scaleTime}
             curve={shape.curveBumpX}>
-            <Decorator />
+            <Decorator color={one.lineColor} />
             <CustomGrid belowChart={true} />
           </LineChart>
           <LineChart
@@ -174,8 +166,10 @@ const Graph = ({one, two}: {one: GraphInput; two: GraphInput}) => {
             yMin={two.min}
             contentInset={contentInset}
             curve={shape.curveBumpX}
-            xScale={scale.scaleTime}
-          />
+            xScale={scale.scaleTime}>
+            <Decorator color={two.lineColor} />
+            <CustomGrid belowChart={true} />
+          </LineChart>
           <XAxis
             style={{
               width: '100%',

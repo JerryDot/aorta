@@ -1,13 +1,14 @@
 import {NativeStackScreenProps} from '@react-navigation/native-stack';
 import moment from 'moment';
-import React, {useState} from 'react';
+import React, {useContext, useState} from 'react';
 import {ScrollView, StyleSheet, Text, useWindowDimensions, View} from 'react-native';
 import {Grid, Col} from 'react-native-easy-grid';
 import {Button} from 'react-native-elements';
-import {RootStackParamList} from '../../App';
+import {DebugTimeContext, RootStackParamList} from '../../App';
 import ContributionGraph from '../contribution';
 import {addActivityRecord, getActivityRecords} from '../database/activity';
 import {deleteRecord} from '../database/general';
+import {isToday} from '../utils/timeUtils';
 
 export type activityColors = {
   sport: string;
@@ -42,6 +43,7 @@ type Props = NativeStackScreenProps<RootStackParamList, 'Home'>;
 const ActivityScreen = ({navigation}: Props) => {
   const [dailyRecords, setDailyRecords] = useState(getActivityRecords(moment().startOf('day').toDate()));
   const {height, width} = useWindowDimensions();
+  const {debugTime, setDebugTime} = useContext(DebugTimeContext);
 
   const buttonOptions = ['sport', 'social', 'dating'];
   const secondButtonOptions = ['study', 'o+', 'o-', 'alcohol'];
@@ -52,7 +54,7 @@ const ActivityScreen = ({navigation}: Props) => {
   };
 
   const addActivityRecordHandler = (type: string) => {
-    addActivityRecord(type);
+    addActivityRecord(type, isToday(debugTime) ? new Date() : debugTime);
     refetchDailyRecords();
   };
 
@@ -107,7 +109,7 @@ const ActivityScreen = ({navigation}: Props) => {
           </Col>
         </Grid>
       </View>
-      <Text>This is {dailyRecords.length} activities.</Text>
+      <Text style={{color: 'black'}}>This is {dailyRecords.length} activities.</Text>
       <View style={{paddingTop: 10, flexDirection: 'row', flexWrap: 'wrap'}}>
         {buttonOptions.map(type => (
           <AddActivityButton key={'aab' + type} type={type} />
@@ -156,6 +158,7 @@ const ActivityScreen = ({navigation}: Props) => {
 
 const styles = StyleSheet.create({
   titleText: {
+    color: 'black',
     paddingTop: 10,
     fontSize: 16,
     fontWeight: 'bold',

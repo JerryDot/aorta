@@ -9,7 +9,7 @@ export const getWeightRecords = (startDay: Date): Realm.Results<Weight> => {
   return getGeneralRecordsPeriod<Weight>('Weight', startDay, endDay);
 };
 
-export const addWeightRecord = (weight: number) => {
+export const addWeightRecord = (weight: number, time: Date) => {
   const possiblePrevRecord = getGeneralRecentRecord<Weight>('Weight');
   if (possiblePrevRecord) {
     realm.write(() => {
@@ -17,7 +17,7 @@ export const addWeightRecord = (weight: number) => {
     });
   } else {
     realm.write(() => {
-      let newWeight = new Weight(new Date(), weight, uuidv4());
+      let newWeight = new Weight(time, weight, uuidv4());
       realm.create(Weight.schema.name, newWeight);
     });
   }

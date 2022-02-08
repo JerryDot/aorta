@@ -9,7 +9,7 @@ export const getMoodRecords = (startDay: Date): Realm.Results<Mood> => {
   return getGeneralRecordsPeriod<Mood>('Mood', startDay, endDay);
 };
 
-export const addMoodRecord = (rating: number) => {
+export const addMoodRecord = (rating: number, time: Date) => {
   const possiblePrevRecord = getGeneralRecentRecord<Mood>('Mood');
   if (possiblePrevRecord) {
     realm.write(() => {
@@ -17,7 +17,7 @@ export const addMoodRecord = (rating: number) => {
     });
   } else {
     realm.write(() => {
-      let mood = new Mood(new Date(), rating, uuidv4(), null, null);
+      let mood = new Mood(time, rating, uuidv4(), null, null);
       realm.create(Mood.schema.name, mood);
     });
   }

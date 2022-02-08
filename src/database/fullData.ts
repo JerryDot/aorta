@@ -1,3 +1,4 @@
+import {startOfDay} from '../utils/timeUtils';
 import {DaySummary, FullDay, getDaySummary, getFullDay} from './day';
 import realm, {Mood, Activity, Calorie, Weight} from './realm';
 
@@ -8,7 +9,7 @@ export const getFirstDay = (): Date => {
   let activities = realm.objects<Activity>('Activity').sorted('date');
   let calories = realm.objects<Calorie>('Calorie').sorted('date');
   let weight = realm.objects<Weight>('Weight').sorted('date');
-  let firstDay: Date = moods[0].date;
+  let firstDay: Date = (moods[0] || {date: new Date()}).date;
   [activities, calories, weight].forEach(thing => {
     if (thing[0] && thing[0].date < firstDay) {
       let newDate = thing[0].date;
@@ -19,10 +20,11 @@ export const getFirstDay = (): Date => {
   return firstDay;
 };
 
-export const getAllDaysSummary = (lastDay: Date): DaySummary[] => {
-  let firstDay: Date = getFirstDay();
+export const getAllDaysSummary = (lastDay: Date, startDay?: Date): DaySummary[] => {
+  let firstDay: Date = startOfDay(startDay) || getFirstDay();
   let dayResults: DaySummary[] = [];
   for (let d = firstDay; d <= lastDay; d.setDate(d.getDate() + 1)) {
+    console.log(d);
     dayResults.push(getDaySummary(d));
   }
   return dayResults;
@@ -30,6 +32,9 @@ export const getAllDaysSummary = (lastDay: Date): DaySummary[] => {
 
 export const getAllData = (): FullData => {
   let firstDay: Date = getFirstDay();
+  firstDay.setHours(0);
+  firstDay.setMinutes(0);
+  console.log(firstDay);
   let dayFullResults = [];
   for (let d = firstDay; d <= new Date(); d.setDate(d.getDate() + 1)) {
     dayFullResults.push(getFullDay(d));

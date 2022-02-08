@@ -1,7 +1,7 @@
 import {NativeStackScreenProps} from '@react-navigation/native-stack';
-import React, {useState} from 'react';
+import React, {useContext, useState} from 'react';
 import {StyleSheet, Text, View} from 'react-native';
-import {RootStackParamList} from '../../App';
+import {DebugTimeContext, RootStackParamList} from '../../App';
 import realm from '../database/realm';
 import 'react-native-get-random-values';
 import {v4 as uuidv4} from 'uuid';
@@ -10,11 +10,13 @@ import moment from 'moment';
 import {deleteRecord} from '../database/general';
 import {Grid, Col} from 'react-native-easy-grid';
 import {Button} from 'react-native-elements';
+import {isToday} from '../utils/timeUtils';
 
 type Props = NativeStackScreenProps<RootStackParamList, 'Home'>;
 
 const MoodScreen = ({navigation}: Props) => {
   const [dailyRecords, setDailyRecords] = useState(getMoodRecords(moment().startOf('day').toDate()));
+  const {debugTime, setDebugTime} = useContext(DebugTimeContext);
   const buttonOptions = [1, 2, 3, 4, 5];
   const secondButtonOptions = [6, 7, 8, 9, 10];
 
@@ -23,7 +25,7 @@ const MoodScreen = ({navigation}: Props) => {
   };
 
   const addMoodRecordHandler = (rating: number) => {
-    addMoodRecord(rating);
+    addMoodRecord(rating, isToday(debugTime) ? new Date() : debugTime);
     refetchDailyRecords();
   };
 
@@ -53,7 +55,9 @@ const MoodScreen = ({navigation}: Props) => {
           </Col>
         </Grid>
       </View>
-      <Text>This is {dailyRecords.length ? (dailyRecords.sum('rating') || 0) / dailyRecords.length : 'empty'}</Text>
+      <Text style={{color: 'black'}}>
+        This is {dailyRecords.length ? (dailyRecords.sum('rating') || 0) / dailyRecords.length : 'empty'}
+      </Text>
       <View style={{paddingTop: 10, flexDirection: 'row', flexWrap: 'wrap'}}>
         {buttonOptions.map(rating => (
           <AddMoodButton key={'amb' + rating} rating={rating} />
@@ -78,6 +82,7 @@ const MoodScreen = ({navigation}: Props) => {
 
 const styles = StyleSheet.create({
   titleText: {
+    color: 'black',
     paddingTop: 10,
     fontSize: 16,
     fontWeight: 'bold',

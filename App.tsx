@@ -8,7 +8,7 @@
  * @format
  */
 import 'react-native-get-random-values';
-import React from 'react';
+import React, {createContext, useContext, useMemo, useState} from 'react';
 import {useColorScheme} from 'react-native';
 
 import {NavigationContainer} from '@react-navigation/native';
@@ -20,6 +20,11 @@ import DietScreen from './src/screens/DietScreen';
 import MoodScreen from './src/screens/MoodScreen';
 import ActivityScreen from './src/screens/ActivityScreen';
 import DataScreen from './src/screens/DataScreen';
+import {LogBox} from 'react-native';
+
+LogBox.ignoreLogs([
+  "[react-native-gesture-handler] Seems like you're using an old API with gesture components, check out new Gestures system!",
+]);
 
 const Stack = createNativeStackNavigator<RootStackParamList>();
 
@@ -32,8 +37,21 @@ export type RootStackParamList = {
   Data: undefined;
 };
 
+export interface DebugTimeContextProps {
+  debugTime: Date;
+  setDebugTime: React.Dispatch<React.SetStateAction<Date>>;
+}
+
+export const DebugTimeContext = React.createContext<DebugTimeContextProps>({
+  debugTime: new Date(),
+  setDebugTime: () => {},
+});
+
 const App = () => {
   const isDarkMode = useColorScheme() === 'dark';
+
+  const [debugTime, setDebugTime] = useState<Date>(new Date());
+  const value = {debugTime, setDebugTime};
 
   const backgroundStyle = {
     backgroundColor: isDarkMode ? Colors.darker : Colors.lighter,
@@ -41,15 +59,18 @@ const App = () => {
 
   return (
     <>
-      <NavigationContainer>
-        <Stack.Navigator>
-          <Stack.Screen name="Home" component={HomeScreen} />
-          <Stack.Screen name="Diet" component={DietScreen} />
-          <Stack.Screen name="Mood" component={MoodScreen} />
-          <Stack.Screen name="Activity" component={ActivityScreen} />
-          <Stack.Screen name="Data" component={DataScreen} />
-        </Stack.Navigator>
-      </NavigationContainer>
+      <DebugTimeContext.Provider value={value}>
+        <NavigationContainer>
+          <Stack.Navigator>
+            <Stack.Screen name="Home" component={HomeScreen} />
+            <Stack.Screen name="Diet" component={DietScreen} />
+            <Stack.Screen name="Mood" component={MoodScreen} />
+            <Stack.Screen name="Activity" component={ActivityScreen} />
+            <Stack.Screen name="Data" component={DataScreen} />
+          </Stack.Navigator>
+        </NavigationContainer>
+      </DebugTimeContext.Provider>
+      {/* </TimeContext.Provider> */}
       {/* <SafeAreaView style={backgroundStyle}>
       <StatusBar barStyle={isDarkMode ? 'light-content' : 'dark-content'} />
       <ScrollView

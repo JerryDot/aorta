@@ -9,9 +9,9 @@ export const getActivityRecords = (startDay: Date): Realm.Results<Activity> => {
   return getGeneralRecordsPeriod<Activity>('Activity', startDay, endDay);
 };
 
-export const addActivityRecord = (type: string) => {
+export const addActivityRecord = (type: string, time: Date) => {
   realm.write(() => {
-    let activity = new Activity(new Date(), type, uuidv4());
+    let activity = new Activity(time, type, uuidv4());
     realm.create(Activity.schema.name, activity);
   });
 };

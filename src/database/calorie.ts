@@ -10,7 +10,7 @@ export const getCalorieRecords = (startDay: Date): Realm.Results<Calorie> => {
   return getGeneralRecordsPeriod<Calorie>('Calorie', startDay, endDay);
 };
 
-export const addCalorieRecord = (calories: number) => {
+export const addCalorieRecord = (calories: number, time: Date) => {
   const possiblePrevRecord = getGeneralRecentRecord<Calorie>('Calorie');
   if (possiblePrevRecord) {
     realm.write(() => {
@@ -18,7 +18,7 @@ export const addCalorieRecord = (calories: number) => {
     });
   } else {
     realm.write(() => {
-      let calorie = new Calorie(moment().toDate(), calories, uuidv4());
+      let calorie = new Calorie(time, calories, uuidv4());
       realm.create(Calorie.schema.name, calorie);
     });
   }

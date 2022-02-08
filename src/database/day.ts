@@ -1,4 +1,4 @@
-import {getGeneralDayRecords} from './general';
+import {getGeneralDayRecords, resultsToArray} from './general';
 import {Activity, Calorie, Mood, Weight} from './realm';
 
 export type DaySummary = {
@@ -19,11 +19,11 @@ export type FullDay = {
 
 export const getDaySummary = (startOfDay: Date): DaySummary => {
   let day: DaySummary = {
-    day: startOfDay,
+    day: new Date(startOfDay),
     mood: getGeneralDayRecords<Mood>('Mood', startOfDay).avg('rating'),
     activities: getGeneralDayRecords<Activity>('Activity', startOfDay).map(record => record.type),
     calories: getGeneralDayRecords<Calorie>('Calorie', startOfDay).sum('amount') || 0,
-    weight: getGeneralDayRecords<Weight>('Weight', startOfDay)[0].amount,
+    weight: (getGeneralDayRecords<Weight>('Weight', startOfDay)[0] || {amount: 0}).amount,
   };
   return day;
 };
@@ -31,10 +31,10 @@ export const getDaySummary = (startOfDay: Date): DaySummary => {
 export const getFullDay = (startOfDay: Date): FullDay => {
   let day: FullDay = {
     day: startOfDay,
-    moods: getGeneralDayRecords<Mood>('Mood', startOfDay).map(result => result.values),
-    activities: getGeneralDayRecords<Activity>('Activity', startOfDay).map(result => result.values),
-    calories: getGeneralDayRecords<Calorie>('Calorie', startOfDay).map(result => result.values),
-    weight: getGeneralDayRecords<Weight>('Weight', startOfDay).map(result => result.values),
+    moods: resultsToArray(getGeneralDayRecords<Mood>('Mood', startOfDay)),
+    activities: resultsToArray(getGeneralDayRecords<Activity>('Activity', startOfDay)),
+    calories: resultsToArray(getGeneralDayRecords<Calorie>('Calorie', startOfDay)),
+    weight: resultsToArray(getGeneralDayRecords<Weight>('Weight', startOfDay)),
   };
   return day;
 };

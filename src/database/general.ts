@@ -30,7 +30,7 @@ export const getGeneralDayRecords = <T>(realmType: RecordString, startTime: Date
 export const getGeneralRecentRecord = <T>(realmType: RecordString): T | null => {
   const endTime = new Date();
   const startTime = new Date();
-  startTime.setMinutes(endTime.getMinutes() - 5); // MAGIC NUMBER ALARM
+  startTime.setMinutes(endTime.getSeconds() - 2); // MAGIC NUMBER ALARM
   const possiblePrevRecord = getGeneralRecordsPeriod<T>(realmType, startTime, endTime);
   if (possiblePrevRecord.length) {
     return possiblePrevRecord[0];
