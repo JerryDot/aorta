@@ -1,10 +1,10 @@
 import {NativeStackScreenProps} from '@react-navigation/native-stack';
 import React, {useContext, useState} from 'react';
-import {Share, Text, TouchableOpacity, View} from 'react-native';
+import {Share, Text, TextInput, TouchableOpacity, View} from 'react-native';
 import DatePicker from 'react-native-date-picker';
 import {Button} from 'react-native-elements';
 import {DebugTimeContext, RootStackParamList} from '../../App';
-import {getAllData} from '../database/fullData';
+import {getAllData, insertAllData} from '../database/fullData';
 
 type Props = NativeStackScreenProps<RootStackParamList, 'Home'>;
 
@@ -26,13 +26,22 @@ const ShareExample = () => {
 
 const DataScreen = ({navigation}: Props) => {
   const {debugTime, setDebugTime} = useContext(DebugTimeContext);
+  const [text, setText] = useState<string>('');
 
   return (
     <View>
-      <Button title="Mood" onPress={() => navigation.navigate('Mood')} />
+      <Button title="Export data" onPress={() => Share.share(shareOptions(JSON.stringify(getAllData())))} />
       <ShareExample />
       <DatePicker date={debugTime} onDateChange={setDebugTime} />
       <Button title="Reset default time" onPress={() => setDebugTime(new Date())} />
+      <TextInput
+        style={{height: 80, marginTop: 'auto', color: 'black', fontSize: 20}}
+        placeholder="Import data from text."
+        placeholderTextColor={'black'}
+        onChangeText={newText => setText(newText)}
+        defaultValue={text}
+      />
+      <Button title="Import data." onPress={() => insertAllData(JSON.parse(text))} />
     </View>
   );
 };

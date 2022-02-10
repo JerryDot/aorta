@@ -30,7 +30,7 @@ export const getDaySummary = (startOfDay: Date): DaySummary => {
 
 export const getFullDay = (startOfDay: Date): FullDay => {
   let day: FullDay = {
-    day: startOfDay,
+    day: new Date(startOfDay),
     moods: resultsToArray(getGeneralDayRecords<Mood>('Mood', startOfDay)),
     activities: resultsToArray(getGeneralDayRecords<Activity>('Activity', startOfDay)),
     calories: resultsToArray(getGeneralDayRecords<Calorie>('Calorie', startOfDay)),

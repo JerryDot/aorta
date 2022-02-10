@@ -109,49 +109,51 @@ const ActivityScreen = ({navigation}: Props) => {
           </Col>
         </Grid>
       </View>
-      <Text style={{color: 'black'}}>This is {dailyRecords.length} activities.</Text>
-      <View style={{paddingTop: 10, flexDirection: 'row', flexWrap: 'wrap'}}>
-        {buttonOptions.map(type => (
-          <AddActivityButton key={'aab' + type} type={type} />
+      <ScrollView>
+        <Text style={{color: 'black'}}>This is {dailyRecords.length} activities.</Text>
+        <View style={{paddingTop: 10, flexDirection: 'row', flexWrap: 'wrap'}}>
+          {buttonOptions.map(type => (
+            <AddActivityButton key={'aab' + type} type={type} />
+          ))}
+        </View>
+        <View style={{paddingTop: 20, flexDirection: 'row', flexWrap: 'wrap'}}>
+          {secondButtonOptions.map(type => (
+            <AddActivityButton key={'aab' + type} type={type} />
+          ))}
+        </View>
+        <View style={{paddingTop: 20, flexDirection: 'row', flexWrap: 'wrap'}}>
+          {thirdButtonOptions.map(type => (
+            <AddActivityButton key={'aab' + type} type={type} />
+          ))}
+        </View>
+        {dailyRecords.map(record => (
+          <Text
+            style={styles.titleText}
+            key={record.recordID}
+            onPress={() => deleteActivityRecordHandler(record.recordID)}>{`${record.date.toDateString()} ${record.type} ${
+            record.recordID
+          }`}</Text>
         ))}
-      </View>
-      <View style={{paddingTop: 20, flexDirection: 'row', flexWrap: 'wrap'}}>
-        {secondButtonOptions.map(type => (
-          <AddActivityButton key={'aab' + type} type={type} />
-        ))}
-      </View>
-      <View style={{paddingTop: 20, flexDirection: 'row', flexWrap: 'wrap'}}>
-        {thirdButtonOptions.map(type => (
-          <AddActivityButton key={'aab' + type} type={type} />
-        ))}
-      </View>
-      {dailyRecords.map(record => (
-        <Text
-          style={styles.titleText}
-          key={record.recordID}
-          onPress={() => deleteActivityRecordHandler(record.recordID)}>{`${record.date.toDateString()} ${record.type} ${
-          record.recordID
-        }`}</Text>
-      ))}
-      <View>
-        <ScrollView horizontal={true}>
-          <ContributionGraph
-            key={'sadfasf'}
-            values={commitsData}
-            endDate={new Date('2022-01-25')}
-            numDays={77}
-            // width={screenWidth}
-            height={250}
-            width={width} // chartConfig={chartConfig}
-            tooltipDataAttrs={null}
-            chartConfig={chartConfig}
-            gutterSize={5}
-            borderSize={3}
-            showOutOfRangeDays={true}
-            activityColorMap={activityColorMap}
-          />
-        </ScrollView>
-      </View>
+        <View>
+          <ScrollView horizontal={true}>
+            <ContributionGraph
+              key={'sadfasf'}
+              values={commitsData}
+              endDate={new Date('2022-01-25')}
+              numDays={77}
+              // width={screenWidth}
+              height={250}
+              width={width} // chartConfig={chartConfig}
+              tooltipDataAttrs={null}
+              chartConfig={chartConfig}
+              gutterSize={5}
+              borderSize={3}
+              showOutOfRangeDays={true}
+              activityColorMap={activityColorMap}
+            />
+          </ScrollView>
+        </View>
+      </ScrollView>
     </>
   );
 };

@@ -10,7 +10,7 @@ import moment from 'moment';
 import {deleteRecord} from '../database/general';
 import {Grid, Col} from 'react-native-easy-grid';
 import {Button} from 'react-native-elements';
-import {isToday} from '../utils/timeUtils';
+import {isToday, startOfDay} from '../utils/timeUtils';
 
 type Props = NativeStackScreenProps<RootStackParamList, 'Home'>;
 
@@ -21,7 +21,7 @@ const MoodScreen = ({navigation}: Props) => {
   const secondButtonOptions = [6, 7, 8, 9, 10];
 
   const refetchDailyRecords = () => {
-    setDailyRecords(getMoodRecords(moment().startOf('day').toDate()));
+    setDailyRecords(getMoodRecords(startOfDay(debugTime)));
   };
 
   const addMoodRecordHandler = (rating: number) => {

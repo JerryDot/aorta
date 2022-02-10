@@ -5,9 +5,8 @@ export const isToday = (someDate: Date) => {
   return someDate.getDate() == today.getDate() && someDate.getMonth() == today.getMonth() && someDate.getFullYear() == today.getFullYear();
 };
 
-export const startOfDay = (someDate?: Date): Date | undefined => {
-  if (!someDate) return undefined;
-  let day = someDate;
+export const startOfDay = (someDate: Date): Date => {
+  let day = new Date(someDate);
   day.setUTCHours(0, 0, 0, 0);
   return day;
 };

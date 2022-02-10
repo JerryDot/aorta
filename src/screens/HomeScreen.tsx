@@ -7,7 +7,7 @@ import {ScrollView} from 'react-native-gesture-handler';
 import {GraphWrapper} from '../components/Graph';
 import {useIsFocused} from '@react-navigation/core';
 import {RecordString} from '../database/realm';
-import {timespanToStartDate} from '../utils/timeUtils';
+import {Timespan, timespanToStartDate} from '../utils/timeUtils';
 
 type Props = NativeStackScreenProps<RootStackParamList, 'Home'>;
 
@@ -15,12 +15,18 @@ const HomeScreen = ({navigation}: Props) => {
   const [key, setKey] = useState(1);
   const [oneKey, setOneKey] = useState<RecordString>('Mood');
   const [twoKey, setTwoKey] = useState<RecordString>('Calorie');
+  const [graphTimespan, setGraphTimespan] = useState<Timespan>('all');
   const [graphStartDate, setGraphStartDate] = useState<Date>(timespanToStartDate('all'));
   const isFocused = useIsFocused();
 
   useEffect(() => {
     setKey(key + 1);
   }, [isFocused]);
+
+  const setGraphTimespanHandler = (timespan: Timespan) => {
+    setGraphTimespan(timespan);
+    setGraphStartDate(timespanToStartDate(timespan));
+  };
 
   return (
     <>
@@ -44,31 +50,41 @@ const HomeScreen = ({navigation}: Props) => {
         </View>
         <Grid>
           <Row>
-            <Col>
-              <Button title="Mood" onPress={() => setOneKey('Mood')} />
-              <Button title="Diet" onPress={() => setOneKey('Calorie')} />
-              <Button title="Activity" onPress={() => setOneKey('Activity')} />
-              <Button title="Weight" onPress={() => setOneKey('Weight')} />
+            <Col style={{paddingBottom: 5}}>
+              <Button color={oneKey === 'Mood' ? 'blue' : ''} title="Mood" onPress={() => setOneKey('Mood')} />
+              <Button color={oneKey === 'Calorie' ? 'darkgreen' : ''} title="Diet" onPress={() => setOneKey('Calorie')} />
+              <Button
+                color={oneKey === 'Activity' ? 'darkpurple' : ''}
+                disabled={true}
+                title="Activity"
+                onPress={() => setOneKey('Activity')}
+              />
+              <Button color={oneKey === 'Weight' ? 'darkred' : ''} title="Weight" onPress={() => setOneKey('Weight')} />
             </Col>
-            <Col>
-              <Button title="Mood" onPress={() => setTwoKey('Mood')} />
-              <Button title="Diet" onPress={() => setTwoKey('Calorie')} />
-              <Button title="Activity" onPress={() => setTwoKey('Activity')} />
-              <Button title="Weight" onPress={() => setTwoKey('Weight')} />
+            <Col style={{paddingBottom: 5}}>
+              <Button color={twoKey === 'Mood' ? 'blue' : ''} title="Mood" onPress={() => setTwoKey('Mood')} />
+              <Button color={twoKey === 'Calorie' ? 'darkgreen' : ''} title="Diet" onPress={() => setTwoKey('Calorie')} />
+              <Button
+                color={twoKey === 'Activity' ? 'darkred' : ''}
+                disabled={true}
+                title="Activity"
+                onPress={() => setTwoKey('Activity')}
+              />
+              <Button color={twoKey === 'Weight' ? 'darkred' : ''} title="Weight" onPress={() => setTwoKey('Weight')} />
             </Col>
           </Row>
           <Row>
-            <Col>
-              <Button title="Day" onPress={() => setGraphStartDate(timespanToStartDate('day'))} />
+            <Col style={{paddingBottom: 5}}>
+              <Button color={graphTimespan === 'day' ? 'blue' : ''} title="Day" onPress={() => setGraphTimespanHandler('day')} />
             </Col>
-            <Col>
-              <Button title="Week" onPress={() => setGraphStartDate(timespanToStartDate('week'))} />
+            <Col style={{paddingBottom: 5}}>
+              <Button color={graphTimespan === 'week' ? 'blue' : ''} title="Week" onPress={() => setGraphTimespanHandler('week')} />
             </Col>
-            <Col>
-              <Button title="Month" onPress={() => setGraphStartDate(timespanToStartDate('month'))} />
+            <Col style={{paddingBottom: 5}}>
+              <Button color={graphTimespan === 'month' ? 'blue' : ''} title="Month" onPress={() => setGraphTimespanHandler('month')} />
             </Col>
-            <Col>
-              <Button title="All" onPress={() => setGraphStartDate(timespanToStartDate('all'))} />
+            <Col style={{paddingBottom: 5}}>
+              <Button color={graphTimespan === 'all' ? 'blue' : ''} title="All" onPress={() => setGraphTimespanHandler('all')} />
             </Col>
           </Row>
         </Grid>

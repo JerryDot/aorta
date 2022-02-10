@@ -2,8 +2,9 @@ import {NativeStackScreenProps} from '@react-navigation/native-stack';
 import moment from 'moment';
 import React, {useContext, useState} from 'react';
 import {StyleSheet, Text, TextInput, View} from 'react-native';
-import {Grid, Col, Row} from 'react-native-easy-grid';
+import {Grid, Col} from 'react-native-easy-grid';
 import {Button} from 'react-native-elements';
+import {ScrollView} from 'react-native-gesture-handler';
 import {DebugTimeContext, RootStackParamList} from '../../App';
 import {addCalorieRecord, getCalorieRecords} from '../database/calorie';
 import {deleteRecord} from '../database/general';
@@ -85,39 +86,42 @@ const DietScreen = ({navigation}: Props) => {
           </Col>
         </Grid>
       </View>
-      <View style={{justifyContent: 'space-between'}}>
-        <Text style={{color: 'black'}}>This is {dailyRecords.sum('amount')}</Text>
-        <View style={{paddingTop: 10, flexDirection: 'row', flexWrap: 'wrap'}}>
-          {buttonOptions.map(amount => (
-            <AddCalorieButton key={'acb' + amount} amount={amount} />
+      <ScrollView>
+        <View style={{justifyContent: 'space-between'}}>
+          <Text style={{color: 'black'}}>This is {dailyRecords.sum('amount')}</Text>
+          <View style={{paddingTop: 10, flexDirection: 'row', flexWrap: 'wrap'}}>
+            {buttonOptions.map(amount => (
+              <AddCalorieButton key={'acb' + amount} amount={amount} />
+            ))}
+          </View>
+          <View style={{paddingTop: 20, flexDirection: 'row', flexWrap: 'wrap'}}>
+            {secondButtonOptions.map(amount => (
+              <AddCalorieButton key={'acb' + amount} amount={amount} />
+            ))}
+          </View>
+          {dailyRecords.map(record => (
+            <Text
+              style={styles.titleText}
+              key={record.recordID}
+              onPress={() => deleteCalorieRecordHandler(record.recordID)}>{`${record.date} ${record.amount} ${record.recordID}`}</Text>
           ))}
-        </View>
-        <View style={{paddingTop: 20, flexDirection: 'row', flexWrap: 'wrap'}}>
-          {secondButtonOptions.map(amount => (
-            <AddCalorieButton key={'acb' + amount} amount={amount} />
+          {dailyWeightRecords.map(record => (
+            <Text
+              style={styles.titleText}
+              key={record.recordID}
+              onPress={() => deleteWeightRecordHandler(record.recordID)}>{`${record.date} ${record.amount} ${record.recordID}`}</Text>
           ))}
+          <TextInput
+            style={{height: 80, marginTop: 'auto', color: 'black', fontSize: 20}}
+            placeholder="Type here to enter weight!"
+            keyboardType="numeric"
+            placeholderTextColor={'black'}
+            onChangeText={newText => setText(newText)}
+            defaultValue={text}
+          />
+          <Button title="Enter Weight" onPress={() => addWeightRecordHandler(text)} />
         </View>
-        {dailyRecords.map(record => (
-          <Text
-            style={styles.titleText}
-            key={record.recordID}
-            onPress={() => deleteCalorieRecordHandler(record.recordID)}>{`${record.date} ${record.amount} ${record.recordID}`}</Text>
-        ))}
-        {dailyWeightRecords.map(record => (
-          <Text
-            style={styles.titleText}
-            key={record.recordID}
-            onPress={() => deleteWeightRecordHandler(record.recordID)}>{`${record.date} ${record.amount} ${record.recordID}`}</Text>
-        ))}
-        <TextInput
-          style={{height: 80, marginTop: 'auto'}}
-          placeholder="Type here to enter weight!"
-          placeholderTextColor={'black'}
-          onChangeText={newText => setText(newText)}
-          defaultValue={text}
-        />
-        <Button title="Enter Weight" onPress={() => addWeightRecordHandler(text)} />
-      </View>
+      </ScrollView>
     </>
   );
 };
