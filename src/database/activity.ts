@@ -1,12 +1,10 @@
-import {getGeneralRecentRecord, getGeneralRecordsPeriod} from './general';
+import {getRecordsPeriod} from './general';
 import realm, {Activity} from './realm';
 import {v4 as uuidv4} from 'uuid';
+import {dayEnd, dayStart} from '../utils/timeUtils';
 
-export const getActivityRecords = (startDay: Date): Realm.Results<Activity> => {
-  // Should be given the start of a day at 1200 am
-  const endDay = new Date(startDay);
-  endDay.setDate(startDay.getDate() + 1);
-  return getGeneralRecordsPeriod<Activity>('Activity', startDay, endDay);
+export const getActivityRecords = (time: Date): Realm.Results<Activity> => {
+  return getRecordsPeriod<Activity>('Activity', dayStart(time), dayEnd(time));
 };
 
 export const addActivityRecord = (type: string, time: Date) => {

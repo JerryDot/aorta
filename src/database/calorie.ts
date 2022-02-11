@@ -1,17 +1,14 @@
-import moment from 'moment';
 import realm, {Calorie} from './realm';
 import {v4 as uuidv4} from 'uuid';
-import {getGeneralRecentRecord, getGeneralRecordsPeriod} from './general';
+import {getRecentRecord, getRecordsPeriod} from './general';
+import {dayEnd, dayStart} from '../utils/timeUtils';
 
-export const getCalorieRecords = (startDay: Date): Realm.Results<Calorie> => {
-  // Should be given the start of a day at 1200 am
-  const endDay = new Date(startDay);
-  endDay.setDate(startDay.getDate() + 1);
-  return getGeneralRecordsPeriod<Calorie>('Calorie', startDay, endDay);
+export const getCalorieRecords = (time: Date): Realm.Results<Calorie> => {
+  return getRecordsPeriod<Calorie>('Calorie', dayStart(time), dayEnd(time));
 };
 
 export const addCalorieRecord = (calories: number, time: Date) => {
-  const possiblePrevRecord = getGeneralRecentRecord<Calorie>('Calorie');
+  const possiblePrevRecord = getRecentRecord<Calorie>('Calorie', time);
   if (possiblePrevRecord) {
     realm.write(() => {
       possiblePrevRecord.amount = possiblePrevRecord.amount + calories;

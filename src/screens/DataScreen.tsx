@@ -5,6 +5,7 @@ import DatePicker from 'react-native-date-picker';
 import {Button} from 'react-native-elements';
 import {DebugTimeContext, RootStackParamList} from '../../App';
 import {getAllData, insertAllData} from '../database/fullData';
+import realm from '../database/realm';
 
 type Props = NativeStackScreenProps<RootStackParamList, 'Home'>;
 
@@ -16,7 +17,7 @@ const shareOptions = (data: string) => ({
 });
 
 const ShareExample = () => {
-  const onSharePress = () => Share.share(shareOptions(JSON.stringify(getAllData())));
+  const onSharePress = () => Share.share(shareOptions(JSON.stringify(getAllData(new Date()))));
   return (
     <TouchableOpacity onPress={() => onSharePress()}>
       <Text style={{color: 'black'}}>Share data</Text>
@@ -28,11 +29,24 @@ const DataScreen = ({navigation}: Props) => {
   const {debugTime, setDebugTime} = useContext(DebugTimeContext);
   const [text, setText] = useState<string>('');
 
+  const shareHandler = () => {
+    let data = getAllData(new Date());
+    console.log(data);
+    console.log(data[0].calories[0]);
+    console.log(data[0].calories[1]);
+
+    console.log(data[0].calories[2]);
+    console.log(data[0].calories[3]);
+    console.log(data[0].calories[4]);
+
+    Share.share(shareOptions(JSON.stringify(getAllData(new Date()))));
+  };
+
   return (
     <View>
-      <Button title="Export data" onPress={() => Share.share(shareOptions(JSON.stringify(getAllData())))} />
+      <Button title="Export data" onPress={() => shareHandler()} />
       <ShareExample />
-      <DatePicker date={debugTime} onDateChange={setDebugTime} />
+      <DatePicker date={debugTime || new Date()} onDateChange={setDebugTime} />
       <Button title="Reset default time" onPress={() => setDebugTime(new Date())} />
       <TextInput
         style={{height: 80, marginTop: 'auto', color: 'black', fontSize: 20}}
@@ -42,6 +56,7 @@ const DataScreen = ({navigation}: Props) => {
         defaultValue={text}
       />
       <Button title="Import data." onPress={() => insertAllData(JSON.parse(text))} />
+      <Button title="Drop tables" style={{paddingTop: 20}} onPress={() => realm.write(() => realm.deleteAll())} />
     </View>
   );
 };

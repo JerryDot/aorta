@@ -8,7 +8,6 @@ import {DebugTimeContext, RootStackParamList} from '../../App';
 import ContributionGraph from '../contribution';
 import {addActivityRecord, getActivityRecords} from '../database/activity';
 import {deleteRecord} from '../database/general';
-import {isToday} from '../utils/timeUtils';
 
 export type activityColors = {
   sport: string;
@@ -54,7 +53,7 @@ const ActivityScreen = ({navigation}: Props) => {
   };
 
   const addActivityRecordHandler = (type: string) => {
-    addActivityRecord(type, isToday(debugTime) ? new Date() : debugTime);
+    addActivityRecord(type, debugTime || new Date());
     refetchDailyRecords();
   };
 

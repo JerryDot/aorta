@@ -16,17 +16,12 @@ const HomeScreen = ({navigation}: Props) => {
   const [oneKey, setOneKey] = useState<RecordString>('Mood');
   const [twoKey, setTwoKey] = useState<RecordString>('Calorie');
   const [graphTimespan, setGraphTimespan] = useState<Timespan>('all');
-  const [graphStartDate, setGraphStartDate] = useState<Date>(timespanToStartDate('all'));
+  const [graphTime, setGraphTime] = useState<Date>(new Date());
   const isFocused = useIsFocused();
 
   useEffect(() => {
     setKey(key + 1);
   }, [isFocused]);
-
-  const setGraphTimespanHandler = (timespan: Timespan) => {
-    setGraphTimespan(timespan);
-    setGraphStartDate(timespanToStartDate(timespan));
-  };
 
   return (
     <>
@@ -46,7 +41,7 @@ const HomeScreen = ({navigation}: Props) => {
           </Col>
         </Grid>
         <View key={key} style={{paddingBottom: 30}}>
-          <GraphWrapper oneKey={oneKey} twoKey={twoKey} startDate={graphStartDate} />
+          <GraphWrapper oneKey={oneKey} twoKey={twoKey} time={graphTime} timespan={graphTimespan} />
         </View>
         <Grid>
           <Row>
@@ -75,16 +70,16 @@ const HomeScreen = ({navigation}: Props) => {
           </Row>
           <Row>
             <Col style={{paddingBottom: 5}}>
-              <Button color={graphTimespan === 'day' ? 'blue' : ''} title="Day" onPress={() => setGraphTimespanHandler('day')} />
+              <Button color={graphTimespan === 'day' ? 'blue' : ''} title="Day" onPress={() => setGraphTimespan('day')} />
             </Col>
             <Col style={{paddingBottom: 5}}>
-              <Button color={graphTimespan === 'week' ? 'blue' : ''} title="Week" onPress={() => setGraphTimespanHandler('week')} />
+              <Button color={graphTimespan === 'week' ? 'blue' : ''} title="Week" onPress={() => setGraphTimespan('week')} />
             </Col>
             <Col style={{paddingBottom: 5}}>
-              <Button color={graphTimespan === 'month' ? 'blue' : ''} title="Month" onPress={() => setGraphTimespanHandler('month')} />
+              <Button color={graphTimespan === 'month' ? 'blue' : ''} title="Month" onPress={() => setGraphTimespan('month')} />
             </Col>
             <Col style={{paddingBottom: 5}}>
-              <Button color={graphTimespan === 'all' ? 'blue' : ''} title="All" onPress={() => setGraphTimespanHandler('all')} />
+              <Button color={graphTimespan === 'all' ? 'blue' : ''} title="All" onPress={() => setGraphTimespan('all')} />
             </Col>
           </Row>
         </Grid>

@@ -7,9 +7,10 @@ import * as dateFns from 'date-fns';
 import * as shape from 'd3-shape';
 import {Circle, G, Line} from 'react-native-svg';
 import {Calorie, Mood, RecordString, Weight} from '../database/realm';
-import {getAllDaysSummary, getFirstDay} from '../database/fullData';
-import {getGeneralRecordsPeriod, getGraphDataPeriod} from '../database/general';
+import {getDaysSummary, getFirstDay} from '../database/fullData';
+import {getRecordsPeriod, getGraphDataPeriod} from '../database/general';
 import {useIsFocused} from '@react-navigation/core';
+import {dayEnd, dayStart, Timespan, timespanToStartDate} from '../utils/timeUtils';
 
 type lineColors = 'purple' | 'green' | 'blue' | 'red';
 
@@ -23,29 +24,36 @@ export type GraphInput = {
   numberOfTicks: number;
 };
 
-const CalorieGraphConfig = (startDate: Date): GraphInput => {
+const CalorieGraphConfig = (time: Date, timespan: Timespan): GraphInput => {
   let graphData = {} as GraphInput;
-  graphData.lineData = getAllDaysSummary(new Date(), new Date(startDate)).map(record => ({
+  graphData.lineData = getDaysSummary(timespanToStartDate(time, timespan), dayEnd(time)).map(record => ({
     date: record.day,
     value: record.calories,
   }));
   console.log(graphData.lineData);
   graphData.lineData.sort((a, b) => a.date.getTime() - b.date.getTime());
   graphData.min = 0;
-  graphData.max = Math.max(...graphData.lineData.map(point => point.value)) + 100;
+  graphData.max = Math.max(...graphData.lineData.map(point => point.value), 1400) + 100;
   graphData.lineColor = 'green';
   graphData.numberOfTicks = 10;
   return graphData;
 };
 
-const MoodGraphConfig = (startDate: Date): GraphInput => {
+const MoodGraphConfig = (time: Date, timespan: Timespan): GraphInput => {
   let graphData = {} as GraphInput;
-  graphData.lineData = getGeneralRecordsPeriod<Mood>('Mood', startDate)
-    .map(record => ({
-      date: record.date,
-      value: record.rating,
-    }))
-    .sort((a, b) => a.date.getTime() - b.date.getTime());
+  if (timespan === 'day') {
+    graphData.lineData = getRecordsPeriod<Mood>('Mood', dayStart(time), dayEnd(time))
+      .map(record => ({
+        date: record.date,
+        value: record.rating,
+      }))
+      .sort((a, b) => a.date.getTime() - b.date.getTime());
+  } else {
+    graphData.lineData = getDaysSummary(timespanToStartDate(time, timespan), dayEnd(time)).map(record => ({
+      date: record.day,
+      value: record.mood,
+    }));
+  }
   graphData.min = 0;
   graphData.max = 10;
   graphData.lineColor = 'blue';
@@ -53,32 +61,32 @@ const MoodGraphConfig = (startDate: Date): GraphInput => {
   return graphData;
 };
 
-const WeightGraphConfig = (startDate: Date): GraphInput => {
+const WeightGraphConfig = (time: Date, timespan: Timespan): GraphInput => {
   let graphData = {} as GraphInput;
-  graphData.lineData = getGeneralRecordsPeriod<Weight>('Weight', startDate)
+  graphData.lineData = getDaysSummary(timespanToStartDate(time, timespan), dayEnd(time))
+    .filter(record => record.weight)
     .map(record => ({
-      date: record.date,
-      value: record.amount,
-    }))
-    .sort((a, b) => a.date.getTime() - b.date.getTime());
-  graphData.min = Math.min(...graphData.lineData.map(point => point.value)) - 3;
-  graphData.max = Math.max(...graphData.lineData.map(point => point.value)) + 3;
+      date: record.day,
+      value: record.weight,
+    })) as LineData;
+  graphData.min = (Math.min(...graphData.lineData.map(point => point.value)) || 65) - 3;
+  graphData.max = (Math.max(...graphData.lineData.map(point => point.value)) || 85) + 3;
   graphData.lineColor = 'red';
   graphData.numberOfTicks = 10;
   return graphData;
 };
 
-type GraphWrapperProps = {oneKey: RecordString; twoKey: RecordString; startDate: Date};
+type GraphWrapperProps = {oneKey: RecordString; twoKey: RecordString; time: Date; timespan: Timespan};
 
-export const GraphWrapper = ({oneKey, twoKey, startDate}: GraphWrapperProps) => {
+export const GraphWrapper = ({oneKey, twoKey, time, timespan}: GraphWrapperProps) => {
   const keyToInput = (key: RecordString): GraphInput => {
     switch (key) {
       case 'Mood':
-        return MoodGraphConfig(startDate);
+        return MoodGraphConfig(time, timespan);
       case 'Calorie':
-        return CalorieGraphConfig(startDate);
+        return CalorieGraphConfig(time, timespan);
       case 'Weight':
-        return WeightGraphConfig(startDate);
+        return WeightGraphConfig(time, timespan);
       case 'Activity':
         throw 'Wow very active graph';
     }
@@ -87,15 +95,18 @@ export const GraphWrapper = ({oneKey, twoKey, startDate}: GraphWrapperProps) => 
   return (
     <>
       <View style={{flexDirection: 'row'}}>
-        <Graph one={oneKey ? keyToInput(oneKey) : keyToInput(oneKey)} two={twoKey ? keyToInput(twoKey) : keyToInput(twoKey)} />
+        <Graph
+          one={oneKey ? keyToInput(oneKey) : keyToInput(oneKey)}
+          two={twoKey ? keyToInput(twoKey) : keyToInput(twoKey)}
+          timespan={timespan}
+        />
       </View>
     </>
   );
 };
 
-const Graph = ({one, two}: {one: GraphInput; two: GraphInput}) => {
+const Graph = ({one, two, timespan}: {one: GraphInput; two: GraphInput; timespan: Timespan}) => {
   console.log(one);
-  const [key, setKey] = useState(1);
   console.log(two);
   const isFocused = useIsFocused();
 
@@ -126,7 +137,7 @@ const Graph = ({one, two}: {one: GraphInput; two: GraphInput}) => {
 
   return (
     <>
-      <View key={key} />
+      <View key={'graphyTimeDanceNow'} />
       <View style={{height: width, flexDirection: 'row'}}>
         <YAxis
           style={{height: width}}
@@ -182,7 +193,13 @@ const Graph = ({one, two}: {one: GraphInput; two: GraphInput}) => {
             svg={{fontSize: 12, fill: 'black'}}
             // xAccessor={({item}) => item.date}
             numberOfTicks={6}
-            formatLabel={value => dateFns.format(value, 'MM:dd')}
+            formatLabel={value => {
+              if (timespan === 'day') {
+                return dateFns.format(value, 'HH:mm');
+              } else {
+                return dateFns.format(value, 'MM:dd');
+              }
+            }}
           />
         </View>
         <YAxis

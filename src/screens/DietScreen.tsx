@@ -9,7 +9,6 @@ import {DebugTimeContext, RootStackParamList} from '../../App';
 import {addCalorieRecord, getCalorieRecords} from '../database/calorie';
 import {deleteRecord} from '../database/general';
 import {addWeightRecord, getWeightRecords} from '../database/weight';
-import {isToday} from '../utils/timeUtils';
 
 type Props = NativeStackScreenProps<RootStackParamList, 'Home'>;
 
@@ -30,7 +29,7 @@ const DietScreen = ({navigation}: Props) => {
   };
 
   const addCalorieRecordHandler = (amount: number) => {
-    addCalorieRecord(amount, isToday(debugTime) ? new Date() : debugTime);
+    addCalorieRecord(amount, debugTime || new Date());
     refetchDailyRecords();
   };
 
@@ -40,7 +39,7 @@ const DietScreen = ({navigation}: Props) => {
   };
 
   const addWeightRecordHandler = (amount: string) => {
-    addWeightRecord(Number(amount), isToday(debugTime) ? new Date() : debugTime);
+    addWeightRecord(Number(amount), debugTime || new Date());
     refetchDailyWeightRecords();
   };
 

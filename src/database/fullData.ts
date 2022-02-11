@@ -1,43 +1,39 @@
-import {startOfDay} from '../utils/timeUtils';
-import {DaySummary, FullDay, getDaySummary, getFullDay} from './day';
+import {dayEnd, dayStart} from '../utils/timeUtils';
+import {DaySummary, FullDay, getDaySummary, getAllDayRecords} from './day';
 import realm, {Mood, Activity, Calorie, Weight} from './realm';
 
 type FullData = FullDay[];
 
 export const getFirstDay = (): Date => {
-  let moods = realm.objects<Mood>('Mood').sorted('date');
+  let moods = realm.objects<Mood>('Mood').sorted('date', true);
   let activities = realm.objects<Activity>('Activity').sorted('date');
-  let calories = realm.objects<Calorie>('Calorie').sorted('date');
+  let calories = realm.objects<Calorie>('Calorie').sorted('date', false);
   let weight = realm.objects<Weight>('Weight').sorted('date');
   let firstDay: Date = (moods[0] || {date: new Date()}).date;
   [activities, calories, weight].forEach(thing => {
     if (thing[0] && thing[0].date < firstDay) {
-      let newDate = thing[0].date;
-      newDate.setHours(0, 0, 0, 0);
-      firstDay = newDate;
+      firstDay = dayStart(thing[0].date);
     }
   });
   return firstDay;
 };
 
-export const getAllDaysSummary = (lastDay: Date, startDay?: Date): DaySummary[] => {
-  let firstDay: Date = startOfDay(startDay) || getFirstDay();
+export const getDaysSummary = (startTime: Date, endTime: Date): DaySummary[] => {
+  let firstDay = new Date(startTime);
   let dayResults: DaySummary[] = [];
-  for (let d = firstDay; d <= lastDay; d.setDate(d.getDate() + 1)) {
+  for (let d = firstDay; d <= dayEnd(endTime); d.setDate(d.getDate() + 1)) {
     console.log(d);
     dayResults.push(getDaySummary(d));
   }
   return dayResults;
 };
 
-export const getAllData = (): FullData => {
+export const getAllData = (currentTime: Date): FullData => {
   let firstDay: Date = getFirstDay();
-  firstDay.setHours(0);
-  firstDay.setMinutes(0);
-  console.log(firstDay);
   let dayFullResults = [];
-  for (let d = firstDay; d <= new Date(); d.setDate(d.getDate() + 1)) {
-    dayFullResults.push(getFullDay(d));
+  for (let d = firstDay; d <= currentTime; d.setDate(d.getDate() + 1)) {
+    // This might get tomorrow too
+    dayFullResults.push(getAllDayRecords(d));
   }
   return dayFullResults;
 };

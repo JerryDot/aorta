@@ -2,15 +2,13 @@ import {NativeStackScreenProps} from '@react-navigation/native-stack';
 import React, {useContext, useState} from 'react';
 import {StyleSheet, Text, View} from 'react-native';
 import {DebugTimeContext, RootStackParamList} from '../../App';
-import realm from '../database/realm';
 import 'react-native-get-random-values';
-import {v4 as uuidv4} from 'uuid';
 import {addMoodRecord, getMoodRecords} from '../database/mood';
 import moment from 'moment';
 import {deleteRecord} from '../database/general';
 import {Grid, Col} from 'react-native-easy-grid';
 import {Button} from 'react-native-elements';
-import {isToday, startOfDay} from '../utils/timeUtils';
+import {dayStart} from '../utils/timeUtils';
 
 type Props = NativeStackScreenProps<RootStackParamList, 'Home'>;
 
@@ -21,11 +19,11 @@ const MoodScreen = ({navigation}: Props) => {
   const secondButtonOptions = [6, 7, 8, 9, 10];
 
   const refetchDailyRecords = () => {
-    setDailyRecords(getMoodRecords(startOfDay(debugTime)));
+    setDailyRecords(getMoodRecords(dayStart(debugTime || new Date())));
   };
 
   const addMoodRecordHandler = (rating: number) => {
-    addMoodRecord(rating, isToday(debugTime) ? new Date() : debugTime);
+    addMoodRecord(rating, debugTime || new Date());
     refetchDailyRecords();
   };
 

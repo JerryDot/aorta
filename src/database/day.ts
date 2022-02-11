@@ -1,5 +1,7 @@
-import {getGeneralDayRecords, resultsToArray} from './general';
-import {Activity, Calorie, Mood, Weight} from './realm';
+import {getDay} from 'date-fns';
+import {dayEnd, dayStart} from '../utils/timeUtils';
+import {getRecordsPeriod, resultsToArray} from './general';
+import {Activity, Calorie, Mood, RecordString, Weight} from './realm';
 
 export type DaySummary = {
   day: Date;
@@ -17,24 +19,31 @@ export type FullDay = {
   weight: Weight['values'][];
 };
 
-export const getDaySummary = (startOfDay: Date): DaySummary => {
+export const getDaySummary = (time: Date): DaySummary => {
   let day: DaySummary = {
-    day: new Date(startOfDay),
-    mood: getGeneralDayRecords<Mood>('Mood', startOfDay).avg('rating'),
-    activities: getGeneralDayRecords<Activity>('Activity', startOfDay).map(record => record.type),
-    calories: getGeneralDayRecords<Calorie>('Calorie', startOfDay).sum('amount') || 0,
-    weight: (getGeneralDayRecords<Weight>('Weight', startOfDay)[0] || {amount: 0}).amount,
+    day: new Date(time),
+    mood: getDayRecords<Mood>('Mood', time).avg('rating'),
+    activities: getDayRecords<Activity>('Activity', time).map(record => record.type),
+    calories: getDayRecords<Calorie>('Calorie', time).sum('amount') || 0,
+    weight: (getDayRecords<Weight>('Weight', time)[0] || {amount: 0}).amount,
   };
   return day;
 };
 
-export const getFullDay = (startOfDay: Date): FullDay => {
+export const getAllDayRecords = (time: Date): FullDay => {
+  console.log(getDayRecords<Mood>('Mood', time));
+  console.log(resultsToArray(getDayRecords<Mood>('Mood', time)));
+
   let day: FullDay = {
-    day: new Date(startOfDay),
-    moods: resultsToArray(getGeneralDayRecords<Mood>('Mood', startOfDay)),
-    activities: resultsToArray(getGeneralDayRecords<Activity>('Activity', startOfDay)),
-    calories: resultsToArray(getGeneralDayRecords<Calorie>('Calorie', startOfDay)),
-    weight: resultsToArray(getGeneralDayRecords<Weight>('Weight', startOfDay)),
+    day: new Date(time),
+    moods: resultsToArray(getDayRecords<Mood>('Mood', time)),
+    activities: resultsToArray(getDayRecords<Activity>('Activity', time)),
+    calories: resultsToArray(getDayRecords<Calorie>('Calorie', time)),
+    weight: resultsToArray(getDayRecords<Weight>('Weight', time)),
   };
   return day;
+};
+
+export const getDayRecords = <T>(realmType: RecordString, time: Date): Realm.Results<T> => {
+  return getRecordsPeriod<T>(realmType, dayStart(time), dayEnd(time));
 };

@@ -1,12 +1,12 @@
 import {LineData} from '../components/Graph';
 import realm, {Calorie, Mood, RecordString, Weight, Activity, RecordType} from './realm';
 
-export const getGeneralRecordsPeriod = <T>(realmType: RecordString, startTime: Date, endTime?: Date): Realm.Results<T> => {
-  return realm.objects<T>(realmType).filtered('date >= $0 && date < $1', startTime, endTime || new Date());
+export const getRecordsPeriod = <T>(realmType: RecordString, startTime: Date, endTime: Date): Realm.Results<T> => {
+  return realm.objects<T>(realmType).filtered('date >= $0 && date < $1', startTime, endTime);
 };
 
-export const getGraphDataPeriod = (realmType: RecordString, startTime: Date, endTime?: Date): LineData => {
-  const realmData = getGeneralRecordsPeriod<RecordType>(realmType, startTime, endTime);
+export const getGraphDataPeriod = (realmType: RecordString, startTime: Date, endTime: Date): LineData => {
+  const realmData = getRecordsPeriod<RecordType>(realmType, startTime, endTime);
   let results = [] as LineData;
   if (realmType === 'Weight' || realmType === 'Calorie') {
     results = resultsToArray<Weight | Calorie>(realmData as Realm.Results<Weight | Calorie>).map(record => ({
@@ -21,17 +21,13 @@ export const getGraphDataPeriod = (realmType: RecordString, startTime: Date, end
   return results;
 };
 
-export const getGeneralDayRecords = <T>(realmType: RecordString, startTime: Date): Realm.Results<T> => {
-  const endTime = new Date(startTime);
-  endTime.setDate(startTime.getDate() + 1);
-  return getGeneralRecordsPeriod<T>(realmType, startTime, endTime);
-};
-
-export const getGeneralRecentRecord = <T>(realmType: RecordString): T | null => {
+export const getRecentRecord = <T>(realmType: RecordString, time: Date): T | null => {
+  console.log('hi');
   const endTime = new Date();
-  const startTime = new Date();
-  startTime.setMinutes(endTime.getSeconds() - 2); // MAGIC NUMBER ALARM
-  const possiblePrevRecord = getGeneralRecordsPeriod<T>(realmType, startTime, endTime);
+  const prevTime = new Date(time);
+  console.log(prevTime);
+  prevTime.setMinutes(time.getMinutes() - 3); // MAGIC NUMBER ALARM
+  const possiblePrevRecord = getRecordsPeriod<T>(realmType, prevTime, endTime);
   if (possiblePrevRecord.length) {
     return possiblePrevRecord[0];
   } else {
@@ -46,5 +42,5 @@ export const deleteRecord = (objectType: RecordString, recordID: string) => {
 };
 
 export const resultsToArray = <T>(realmResults: Realm.Results<T>): T[] => {
-  return realmResults.map(x => Object.assign({}, x));
+  return Array.from(realmResults);
 };
