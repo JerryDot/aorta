@@ -6,6 +6,7 @@ import {Button} from 'react-native-elements';
 import {DebugTimeContext, RootStackParamList} from '../../App';
 import {getAllData, insertAllData} from '../database/fullData';
 import realm from '../database/realm';
+import {testData} from '../utils/testData';
 
 type Props = NativeStackScreenProps<RootStackParamList, 'Home'>;
 
@@ -16,38 +17,19 @@ const shareOptions = (data: string) => ({
   subject: 'Subject',
 });
 
-const ShareExample = () => {
-  const onSharePress = () => Share.share(shareOptions(JSON.stringify(getAllData(new Date()))));
-  return (
-    <TouchableOpacity onPress={() => onSharePress()}>
-      <Text style={{color: 'black'}}>Share data</Text>
-    </TouchableOpacity>
-  );
-};
-
 const DataScreen = ({navigation}: Props) => {
   const {debugTime, setDebugTime} = useContext(DebugTimeContext);
   const [text, setText] = useState<string>('');
 
   const shareHandler = () => {
-    let data = getAllData(new Date());
-    console.log(data);
-    console.log(data[0].calories[0]);
-    console.log(data[0].calories[1]);
-
-    console.log(data[0].calories[2]);
-    console.log(data[0].calories[3]);
-    console.log(data[0].calories[4]);
-
     Share.share(shareOptions(JSON.stringify(getAllData(new Date()))));
   };
 
   return (
     <View>
       <Button title="Export data" onPress={() => shareHandler()} />
-      <ShareExample />
       <DatePicker date={debugTime || new Date()} onDateChange={setDebugTime} />
-      <Button title="Reset default time" onPress={() => setDebugTime(new Date())} />
+      <Button title="Reset default time" onPress={() => setDebugTime(undefined)} />
       <TextInput
         style={{height: 80, marginTop: 'auto', color: 'black', fontSize: 20}}
         placeholder="Import data from text."
@@ -56,7 +38,8 @@ const DataScreen = ({navigation}: Props) => {
         defaultValue={text}
       />
       <Button title="Import data." onPress={() => insertAllData(JSON.parse(text))} />
-      <Button title="Drop tables" style={{paddingTop: 20}} onPress={() => realm.write(() => realm.deleteAll())} />
+      <Button title="Clear tables" style={{paddingTop: 20}} onPress={() => realm.write(() => realm.deleteAll())} />
+      <Button title="Add test-data" style={{paddingTop: 20}} onPress={() => insertAllData(JSON.parse(testData))} />
     </View>
   );
 };

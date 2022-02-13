@@ -9,16 +9,17 @@ import {DebugTimeContext, RootStackParamList} from '../../App';
 import {addCalorieRecord, getCalorieRecords} from '../database/calorie';
 import {deleteRecord} from '../database/general';
 import {addWeightRecord, getWeightRecords} from '../database/weight';
+import {dayStart} from '../utils/timeUtils';
 
 type Props = NativeStackScreenProps<RootStackParamList, 'Home'>;
 
 const DietScreen = ({navigation}: Props) => {
-  const [dailyRecords, setDailyRecords] = useState(getCalorieRecords(moment().startOf('day').toDate()));
-  const [dailyWeightRecords, setDailyWeightRecords] = useState(getWeightRecords(moment().startOf('day').toDate()));
+  const {debugTime, setDebugTime} = useContext(DebugTimeContext);
+  const [dailyRecords, setDailyRecords] = useState(getCalorieRecords(dayStart(debugTime || new Date())));
+  const [dailyWeightRecords, setDailyWeightRecords] = useState(getWeightRecords(dayStart(debugTime || new Date())));
   const buttonOptions = [25, 50, 100];
   const secondButtonOptions = [200, 400, 1000];
   const [text, setText] = useState<string>('');
-  const {debugTime, setDebugTime} = useContext(DebugTimeContext);
 
   const refetchDailyRecords = () => {
     setDailyRecords(getCalorieRecords(moment().startOf('day').toDate()));
@@ -102,13 +103,13 @@ const DietScreen = ({navigation}: Props) => {
             <Text
               style={styles.titleText}
               key={record.recordID}
-              onPress={() => deleteCalorieRecordHandler(record.recordID)}>{`${record.date} ${record.amount} ${record.recordID}`}</Text>
+              onPress={() => deleteCalorieRecordHandler(record.recordID)}>{`${record.date} ${record.amount}`}</Text>
           ))}
           {dailyWeightRecords.map(record => (
             <Text
               style={styles.titleText}
               key={record.recordID}
-              onPress={() => deleteWeightRecordHandler(record.recordID)}>{`${record.date} ${record.amount} ${record.recordID}`}</Text>
+              onPress={() => deleteWeightRecordHandler(record.recordID)}>{`${record.date} ${record.amount}`}</Text>
           ))}
           <TextInput
             style={{height: 80, marginTop: 'auto', color: 'black', fontSize: 20}}

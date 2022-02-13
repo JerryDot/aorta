@@ -40,16 +40,16 @@ const activityColorMap = {
 type Props = NativeStackScreenProps<RootStackParamList, 'Home'>;
 
 const ActivityScreen = ({navigation}: Props) => {
-  const [dailyRecords, setDailyRecords] = useState(getActivityRecords(moment().startOf('day').toDate()));
-  const {height, width} = useWindowDimensions();
   const {debugTime, setDebugTime} = useContext(DebugTimeContext);
+  const [dailyRecords, setDailyRecords] = useState(getActivityRecords(debugTime || new Date()));
+  const {height, width} = useWindowDimensions();
 
   const buttonOptions = ['sport', 'social', 'dating'];
   const secondButtonOptions = ['study', 'o+', 'o-', 'alcohol'];
   const thirdButtonOptions = ['wfh', 'wfo', 'w+', 'w-'];
 
   const refetchDailyRecords = () => {
-    setDailyRecords(getActivityRecords(moment().startOf('day').toDate()));
+    setDailyRecords(getActivityRecords(debugTime || new Date()));
   };
 
   const addActivityRecordHandler = (type: string) => {
@@ -126,12 +126,9 @@ const ActivityScreen = ({navigation}: Props) => {
           ))}
         </View>
         {dailyRecords.map(record => (
-          <Text
-            style={styles.titleText}
-            key={record.recordID}
-            onPress={() => deleteActivityRecordHandler(record.recordID)}>{`${record.date.toDateString()} ${record.type} ${
-            record.recordID
-          }`}</Text>
+          <Text style={styles.titleText} key={record.recordID} onPress={() => deleteActivityRecordHandler(record.recordID)}>
+            {`${record.date.toDateString()} ${record.type}`}
+          </Text>
         ))}
         <View>
           <ScrollView horizontal={true}>

@@ -1,20 +1,20 @@
-import React, {useEffect, useState} from 'react';
+import React from 'react';
 import {StyleSheet, useWindowDimensions, View} from 'react-native';
-import {Button} from 'react-native-elements';
-import {YAxis, XAxis, LineChart, Grid} from 'react-native-svg-charts';
+import {YAxis, XAxis, LineChart, Grid, BarChart} from 'react-native-svg-charts';
 import * as scale from 'd3-scale';
 import * as dateFns from 'date-fns';
 import * as shape from 'd3-shape';
 import {Circle, G, Line} from 'react-native-svg';
-import {Calorie, Mood, RecordString, Weight} from '../database/realm';
-import {getDaysSummary, getFirstDay} from '../database/fullData';
-import {getRecordsPeriod, getGraphDataPeriod} from '../database/general';
+import {Calorie, Mood, RecordString} from '../database/realm';
+import {getDaysSummary} from '../database/fullData';
+import {getRecordsPeriod} from '../database/general';
 import {useIsFocused} from '@react-navigation/core';
 import {dayEnd, dayStart, Timespan, timespanToStartDate} from '../utils/timeUtils';
+import {getDayStartEnd} from '../database/day';
 
 type lineColors = 'purple' | 'green' | 'blue' | 'red';
 
-export type LineData = {date: Date; value: number}[];
+export type LineData = {date: Date; value?: number}[];
 
 export type GraphInput = {
   lineData: LineData;
@@ -22,18 +22,53 @@ export type GraphInput = {
   max: number;
   min: number;
   numberOfTicks: number;
+  bar?: boolean;
 };
 
 const CalorieGraphConfig = (time: Date, timespan: Timespan): GraphInput => {
   let graphData = {} as GraphInput;
-  graphData.lineData = getDaysSummary(timespanToStartDate(time, timespan), dayEnd(time)).map(record => ({
-    date: record.day,
-    value: record.calories,
-  }));
+  if (timespan !== 'day') {
+    graphData.lineData = getDaysSummary(timespanToStartDate(time, timespan), dayEnd(time)).map(record => ({
+      date: record.day,
+      value: record.calories,
+    }));
+    graphData.lineData.sort((a, b) => a.date.getTime() - b.date.getTime());
+    graphData.max = Math.max(...graphData.lineData.map(point => point.value || 0), 1400) + 100;
+  } else {
+    graphData.lineData = getRecordsPeriod<Calorie>('Calorie', dayStart(time), dayEnd(time)).map(record => ({
+      date: record.date,
+      value: record.amount,
+    }));
+    graphData.max = Math.max(...graphData.lineData.map(point => point.value || 0), 500) + 100;
+    graphData.bar = true;
+  }
   console.log(graphData.lineData);
-  graphData.lineData.sort((a, b) => a.date.getTime() - b.date.getTime());
   graphData.min = 0;
-  graphData.max = Math.max(...graphData.lineData.map(point => point.value), 1400) + 100;
+  graphData.lineColor = 'green';
+  graphData.numberOfTicks = 10;
+  return graphData;
+};
+
+const CalorieDayGraphConfig = (time: Date): GraphInput => {
+  let graphData = {} as GraphInput;
+  const dayRecords = getRecordsPeriod<Calorie>('Calorie', dayStart(time), dayEnd(time)).map(record => ({
+    date: record.date,
+    value: record.amount,
+  }));
+  const startEnd = getDayStartEnd(time);
+  graphData.lineData = [];
+  for (let d = startEnd.start; d <= startEnd.end; d.setMinutes(d.getMinutes() + 20)) {
+    graphData.lineData.push({
+      date: d,
+      value: dayRecords
+        .filter(record => d <= record.date && record.date.getTime() <= d.getTime() + 20 * 60 * 1000)
+        .reduce((sum, record) => record.value + sum, 0),
+    });
+  }
+  graphData.max = Math.max(...graphData.lineData.map(point => point.value || 0), 500) + 100;
+  graphData.bar = true;
+  console.log(graphData.lineData);
+  graphData.min = 0;
   graphData.lineColor = 'green';
   graphData.numberOfTicks = 10;
   return graphData;
@@ -41,19 +76,29 @@ const CalorieGraphConfig = (time: Date, timespan: Timespan): GraphInput => {
 
 const MoodGraphConfig = (time: Date, timespan: Timespan): GraphInput => {
   let graphData = {} as GraphInput;
-  if (timespan === 'day') {
-    graphData.lineData = getRecordsPeriod<Mood>('Mood', dayStart(time), dayEnd(time))
-      .map(record => ({
-        date: record.date,
-        value: record.rating,
-      }))
-      .sort((a, b) => a.date.getTime() - b.date.getTime());
-  } else {
-    graphData.lineData = getDaysSummary(timespanToStartDate(time, timespan), dayEnd(time)).map(record => ({
-      date: record.day,
-      value: record.mood,
-    }));
-  }
+  graphData.lineData = getDaysSummary(timespanToStartDate(time, timespan), dayEnd(time)).map(record => ({
+    date: record.day,
+    value: record.mood,
+  }));
+  graphData.min = 0;
+  graphData.max = 10;
+  graphData.lineColor = 'blue';
+  graphData.numberOfTicks = 10;
+  return graphData;
+};
+
+const MoodDayGraphConfig = (time: Date): GraphInput => {
+  let graphData = {} as GraphInput;
+  graphData.lineData = getRecordsPeriod<Mood>('Mood', dayStart(time), dayEnd(time)).map(record => ({
+    date: record.date,
+    value: record.rating,
+  }));
+  console.log(graphData.lineData);
+  let startEnd = getDayStartEnd(time);
+  graphData.lineData = [{date: startEnd.start, value: undefined}, ...graphData.lineData, {date: startEnd.end, value: undefined}].sort(
+    (a, b) => a.date.getTime() - b.date.getTime(),
+  );
+  console.log(graphData.lineData);
   graphData.min = 0;
   graphData.max = 10;
   graphData.lineColor = 'blue';
@@ -69,8 +114,8 @@ const WeightGraphConfig = (time: Date, timespan: Timespan): GraphInput => {
       date: record.day,
       value: record.weight,
     })) as LineData;
-  graphData.min = (Math.min(...graphData.lineData.map(point => point.value)) || 65) - 3;
-  graphData.max = (Math.max(...graphData.lineData.map(point => point.value)) || 85) + 3;
+  graphData.min = (Math.min(...graphData.lineData.map(point => point.value || 0)) || 65) - 3;
+  graphData.max = (Math.max(...graphData.lineData.map(point => point.value || 0)) || 85) + 3;
   graphData.lineColor = 'red';
   graphData.numberOfTicks = 10;
   return graphData;
@@ -82,9 +127,9 @@ export const GraphWrapper = ({oneKey, twoKey, time, timespan}: GraphWrapperProps
   const keyToInput = (key: RecordString): GraphInput => {
     switch (key) {
       case 'Mood':
-        return MoodGraphConfig(time, timespan);
+        return timespan === 'day' ? MoodDayGraphConfig(time) : MoodGraphConfig(time, timespan);
       case 'Calorie':
-        return CalorieGraphConfig(time, timespan);
+        return timespan === 'day' ? CalorieDayGraphConfig(time) : CalorieGraphConfig(time, timespan);
       case 'Weight':
         return WeightGraphConfig(time, timespan);
       case 'Activity':
@@ -152,41 +197,73 @@ const Graph = ({one, two, timespan}: {one: GraphInput; two: GraphInput; timespan
           // numberOfTicks={10}
         />
         <View style={{width: '87%', height: width}}>
-          <LineChart
-            style={{height: width}}
-            svg={{fill: 'none', stroke: one.lineColor}}
-            data={one.lineData}
-            contentInset={contentInset}
-            xAccessor={({item}) => item.date}
-            yAccessor={({item}) => item.value}
-            yMax={one.max}
-            yMin={one.min}
-            yScale={scale.scaleLinear}
-            xScale={scale.scaleTime}
-            curve={shape.curveBumpX}>
-            <Decorator color={one.lineColor} />
-            <CustomGrid belowChart={true} />
-          </LineChart>
-          <LineChart
-            style={StyleSheet.absoluteFill}
-            svg={{fill: 'none', stroke: two.lineColor}}
-            data={two.lineData}
-            xAccessor={({item}) => item.date}
-            yAccessor={({item}) => item.value}
-            yMax={two.max}
-            yMin={two.min}
-            contentInset={contentInset}
-            curve={shape.curveBumpX}
-            xScale={scale.scaleTime}>
-            <Decorator color={two.lineColor} />
-            <CustomGrid belowChart={true} />
-          </LineChart>
+          {one.bar ? (
+            <BarChart
+              style={StyleSheet.absoluteFill}
+              svg={{fill: 'none', fillOpacity: 0.5, stroke: one.lineColor}}
+              data={one.lineData}
+              xAccessor={({item}) => item.date}
+              yAccessor={({item}) => item.value}
+              yMax={one.max}
+              yMin={one.min}
+              contentInset={contentInset}
+              curve={shape.curveBumpX}
+              xScale={scale.scaleTime}
+            />
+          ) : (
+            <LineChart
+              style={{height: width}}
+              svg={{fill: 'none', stroke: one.lineColor}}
+              data={one.lineData}
+              contentInset={contentInset}
+              xAccessor={({item}) => item.date}
+              yAccessor={({item}) => item.value}
+              yMax={one.max}
+              yMin={one.min}
+              yScale={scale.scaleLinear}
+              xScale={scale.scaleTime}
+              curve={shape.curveBumpX}>
+              <Decorator color={one.lineColor} />
+              <CustomGrid belowChart={true} />
+            </LineChart>
+          )}
+          {!two.bar && (
+            <LineChart
+              style={StyleSheet.absoluteFill}
+              svg={{fill: 'none', stroke: two.lineColor}}
+              data={two.lineData}
+              xAccessor={({item}) => item.date}
+              yAccessor={({item}) => item.value}
+              yMax={two.max}
+              yMin={two.min}
+              contentInset={contentInset}
+              curve={shape.curveBumpX}
+              yScale={scale.scaleLinear}
+              xScale={scale.scaleTime}>
+              <Decorator color={two.lineColor} />
+              <CustomGrid belowChart={true} />
+            </LineChart>
+          )}
+          {two.bar && (
+            <BarChart
+              style={StyleSheet.absoluteFill}
+              svg={{fill: 'none', stroke: two.lineColor}}
+              data={two.lineData}
+              xAccessor={({item}) => item.date}
+              yAccessor={({item}) => item.value}
+              yMax={two.max}
+              yMin={two.min}
+              contentInset={contentInset}
+              curve={shape.curveBumpX}
+              xScale={scale.scaleTime}
+            />
+          )}
           <XAxis
             style={{
               width: '100%',
               bottom: 10,
             }}
-            data={one.lineData}
+            data={one.lineData.concat(two.lineData)} // This needs to catch all visible data
             xAccessor={({item}) => item.date}
             scale={scale.scaleTime}
             contentInset={contentInset}

@@ -13,8 +13,8 @@ import {dayStart} from '../utils/timeUtils';
 type Props = NativeStackScreenProps<RootStackParamList, 'Home'>;
 
 const MoodScreen = ({navigation}: Props) => {
-  const [dailyRecords, setDailyRecords] = useState(getMoodRecords(moment().startOf('day').toDate()));
   const {debugTime, setDebugTime} = useContext(DebugTimeContext);
+  const [dailyRecords, setDailyRecords] = useState(getMoodRecords(dayStart(debugTime || new Date())));
   const buttonOptions = [1, 2, 3, 4, 5];
   const secondButtonOptions = [6, 7, 8, 9, 10];
 
@@ -72,7 +72,7 @@ const MoodScreen = ({navigation}: Props) => {
           key={record.recordID}
           onPress={() =>
             deleteMoodRecordHandler(record.recordID)
-          }>{`${record.date} ${record.rating} ${record.recordID} ${record.flavour} ${record.comment}`}</Text>
+          }>{`${record.date} ${record.rating} ${record.flavour} ${record.comment}`}</Text>
       ))}
     </>
   );

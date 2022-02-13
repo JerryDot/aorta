@@ -1,7 +1,7 @@
 import {getDay} from 'date-fns';
 import {dayEnd, dayStart} from '../utils/timeUtils';
 import {getRecordsPeriod, resultsToArray} from './general';
-import {Activity, Calorie, Mood, RecordString, Weight} from './realm';
+import {Activity, Calorie, Mood, RecordString, RecordType, Weight} from './realm';
 
 export type DaySummary = {
   day: Date;
@@ -42,6 +42,33 @@ export const getAllDayRecords = (time: Date): FullDay => {
     weight: resultsToArray(getDayRecords<Weight>('Weight', time)),
   };
   return day;
+};
+
+export type DayStartEnd = {
+  start: Date;
+  end: Date;
+};
+
+export const getDayStartEnd = (time: Date): DayStartEnd => {
+  let dayRecords = getAllDayRecords(time);
+  let start = dayEnd(time);
+  let end = dayStart(time);
+  [...dayRecords.moods, ...dayRecords.calories, ...dayRecords.activities, ...dayRecords.weight].forEach(element => {
+    if (element.date < start) {
+      start = element.date;
+    }
+    if (element.date > end) {
+      end = element.date;
+    }
+  });
+  const startEnd: DayStartEnd = {start, end};
+  const reserveStart = dayStart(time);
+  reserveStart.setHours(7);
+  const reserveEnd = dayEnd(time);
+  reserveEnd.setHours(22);
+  startEnd.start = [start, reserveStart].sort((a, b) => a.getTime() - b.getTime())[0];
+  startEnd.end = [end, reserveEnd].sort((a, b) => b.getTime() - a.getTime())[0];
+  return startEnd;
 };
 
 export const getDayRecords = <T>(realmType: RecordString, time: Date): Realm.Results<T> => {

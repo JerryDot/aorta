@@ -1,22 +1,23 @@
 import {NativeStackScreenProps} from '@react-navigation/native-stack';
-import React, {useEffect, useState} from 'react';
+import React, {useContext, useEffect, useState} from 'react';
 import {Button, View} from 'react-native';
 import {Col, Grid, Row} from 'react-native-easy-grid';
-import {RootStackParamList} from '../../App';
+import {DebugTimeContext, RootStackParamList} from '../../App';
 import {ScrollView} from 'react-native-gesture-handler';
 import {GraphWrapper} from '../components/Graph';
 import {useIsFocused} from '@react-navigation/core';
 import {RecordString} from '../database/realm';
-import {Timespan, timespanToStartDate} from '../utils/timeUtils';
+import {Timespan} from '../utils/timeUtils';
 
 type Props = NativeStackScreenProps<RootStackParamList, 'Home'>;
 
 const HomeScreen = ({navigation}: Props) => {
   const [key, setKey] = useState(1);
+  const {debugTime, setDebugTime} = useContext(DebugTimeContext);
   const [oneKey, setOneKey] = useState<RecordString>('Mood');
   const [twoKey, setTwoKey] = useState<RecordString>('Calorie');
   const [graphTimespan, setGraphTimespan] = useState<Timespan>('all');
-  const [graphTime, setGraphTime] = useState<Date>(new Date());
+  const [graphTime, setGraphTime] = useState<Date>(debugTime || new Date());
   const isFocused = useIsFocused();
 
   useEffect(() => {
