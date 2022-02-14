@@ -76,10 +76,13 @@ const CalorieDayGraphConfig = (time: Date): GraphInput => {
 
 const MoodGraphConfig = (time: Date, timespan: Timespan): GraphInput => {
   let graphData = {} as GraphInput;
-  graphData.lineData = getDaysSummary(timespanToStartDate(time, timespan), dayEnd(time)).map(record => ({
-    date: record.day,
-    value: record.mood,
-  }));
+  graphData.lineData = getDaysSummary(timespanToStartDate(time, timespan), dayEnd(time))
+    .map(record => ({
+      date: record.day,
+      value: record.mood,
+    }))
+    .filter(dayData => dayData.value !== undefined);
+  console.log(graphData);
   graphData.min = 0;
   graphData.max = 10;
   graphData.lineColor = 'blue';
