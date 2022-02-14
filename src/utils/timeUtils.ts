@@ -27,3 +27,6 @@ export const timespanToStartDate = (time: Date, timespan: Timespan): Date => {
   }
   return startDay;
 };
+
+export const dString = (time: Date) =>
+  time.toLocaleTimeString('it-IT', {timeStyle: 'short', hour: '2-digit', minute: '2-digit'}).slice(0, -3);

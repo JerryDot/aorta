@@ -1,4 +1,4 @@
-import {getRecentRecord, getRecordsPeriod} from './general';
+import {getRecentRecord, getRecordsPeriod, resultsToArray} from './general';
 import realm, {Mood} from './realm';
 import {v4 as uuidv4} from 'uuid';
 import {dayEnd, dayStart} from '../utils/timeUtils';
@@ -41,4 +41,15 @@ export const editMoodRecord = (recordID: string, date?: Date, rating?: number, f
       mood.comment = comment;
     }
   });
+};
+
+export const alterMoodRecord = (comment: string, time: Date, setText: React.Dispatch<React.SetStateAction<string>>) => {
+  const moodRecords = resultsToArray(getMoodRecords(time)).sort((a, b) => a.date.getTime() - b.date.getTime());
+  console.log(moodRecords);
+  let record = moodRecords.pop();
+  if (!record) {
+    setText('No record to comment on.');
+  } else {
+    editMoodRecord(record.recordID, record.date, record.rating, record.flavour || undefined, comment);
+  }
 };

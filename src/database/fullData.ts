@@ -32,7 +32,6 @@ export const getAllData = (currentTime: Date): FullData => {
   let firstDay: Date = getFirstDay();
   let dayFullResults = [];
   for (let d = firstDay; d <= currentTime; d.setDate(d.getDate() + 1)) {
-    // This might get tomorrow too
     dayFullResults.push(getAllDayRecords(d));
   }
   return dayFullResults;

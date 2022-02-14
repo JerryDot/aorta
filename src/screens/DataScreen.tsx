@@ -1,6 +1,6 @@
 import {NativeStackScreenProps} from '@react-navigation/native-stack';
 import React, {useContext, useState} from 'react';
-import {Share, Text, TextInput, TouchableOpacity, View} from 'react-native';
+import {ScrollView, Share, TextInput} from 'react-native';
 import DatePicker from 'react-native-date-picker';
 import {Button} from 'react-native-elements';
 import {DebugTimeContext, RootStackParamList} from '../../App';
@@ -26,21 +26,21 @@ const DataScreen = ({navigation}: Props) => {
   };
 
   return (
-    <View>
+    <ScrollView>
       <Button title="Export data" onPress={() => shareHandler()} />
       <DatePicker date={debugTime || new Date()} onDateChange={setDebugTime} />
       <Button title="Reset default time" onPress={() => setDebugTime(undefined)} />
       <TextInput
-        style={{height: 80, marginTop: 'auto', color: 'black', fontSize: 20}}
+        style={{height: 80, color: 'black', fontSize: 20, paddingTop: 10}}
         placeholder="Import data from text."
         placeholderTextColor={'black'}
         onChangeText={newText => setText(newText)}
         defaultValue={text}
       />
-      <Button title="Import data." onPress={() => insertAllData(JSON.parse(text))} />
-      <Button title="Clear tables" style={{paddingTop: 20}} onPress={() => realm.write(() => realm.deleteAll())} />
-      <Button title="Add test-data" style={{paddingTop: 20}} onPress={() => insertAllData(JSON.parse(testData))} />
-    </View>
+      <Button title="Import data." disabled={!text} onPress={() => insertAllData(JSON.parse(text))} />
+      <Button title="Clear tables" containerStyle={{paddingTop: 5}} onPress={() => realm.write(() => realm.deleteAll())} />
+      <Button title="Add test-data" containerStyle={{paddingTop: 5}} onPress={() => insertAllData(testData)} />
+    </ScrollView>
   );
 };
 

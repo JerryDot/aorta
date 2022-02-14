@@ -1,14 +1,15 @@
 import {NativeStackScreenProps} from '@react-navigation/native-stack';
 import React, {useContext, useState} from 'react';
-import {StyleSheet, Text, View} from 'react-native';
+import {StyleSheet, Text, TextInput, useWindowDimensions, View} from 'react-native';
 import {DebugTimeContext, RootStackParamList} from '../../App';
 import 'react-native-get-random-values';
-import {addMoodRecord, getMoodRecords} from '../database/mood';
+import {addMoodRecord, alterMoodRecord, getMoodRecords} from '../database/mood';
 import moment from 'moment';
 import {deleteRecord} from '../database/general';
-import {Grid, Col} from 'react-native-easy-grid';
+import {Grid, Col, Row} from 'react-native-easy-grid';
 import {Button} from 'react-native-elements';
-import {dayStart} from '../utils/timeUtils';
+import {dayStart, dString} from '../utils/timeUtils';
+import {ScrollView} from 'react-native-gesture-handler';
 
 type Props = NativeStackScreenProps<RootStackParamList, 'Home'>;
 
@@ -17,6 +18,8 @@ const MoodScreen = ({navigation}: Props) => {
   const [dailyRecords, setDailyRecords] = useState(getMoodRecords(dayStart(debugTime || new Date())));
   const buttonOptions = [1, 2, 3, 4, 5];
   const secondButtonOptions = [6, 7, 8, 9, 10];
+  const {height, width} = useWindowDimensions();
+  const [moodComment, setMoodComment] = useState<string>('');
 
   const refetchDailyRecords = () => {
     setDailyRecords(getMoodRecords(dayStart(debugTime || new Date())));
@@ -24,6 +27,11 @@ const MoodScreen = ({navigation}: Props) => {
 
   const addMoodRecordHandler = (rating: number) => {
     addMoodRecord(rating, debugTime || new Date());
+    refetchDailyRecords();
+  };
+
+  const commentMoodRecordHandler = (comment: string) => {
+    alterMoodRecord(comment, debugTime || new Date(), setMoodComment);
     refetchDailyRecords();
   };
 
@@ -66,22 +74,42 @@ const MoodScreen = ({navigation}: Props) => {
           <AddMoodButton key={'amb' + rating} rating={rating} />
         ))}
       </View>
-      {dailyRecords.map(record => (
-        <Text
-          style={styles.titleText}
-          key={record.recordID}
-          onPress={() =>
-            deleteMoodRecordHandler(record.recordID)
-          }>{`${record.date} ${record.rating} ${record.flavour} ${record.comment}`}</Text>
-      ))}
+      <ScrollView style={{height: width}}>
+        <Grid style={{height: width}}>
+          {dailyRecords.map(record => (
+            <Row>
+              <Col>
+                <Text style={styles.titleText} key={record.recordID} onPress={() => deleteMoodRecordHandler(record.recordID)}>
+                  {`${dString(record.date)}`}
+                </Text>
+              </Col>
+              <Col>
+                <Text>{`${record.rating}`}</Text>
+              </Col>
+              <Col>
+                <Text>{`${record.comment}`}</Text>
+              </Col>
+            </Row>
+          ))}
+        </Grid>
+      </ScrollView>
+      <TextInput
+        style={{height: 80, color: 'black', fontSize: 20, paddingTop: 10}}
+        placeholder="Import data from text."
+        placeholderTextColor={'black'}
+        onChangeText={moodComment => setMoodComment(moodComment)}
+        defaultValue={moodComment}
+      />
+      <Button title="Add Comment" containerStyle={{paddingTop: 10}} onPress={() => commentMoodRecordHandler(moodComment)} />
     </>
   );
 };
 
 const styles = StyleSheet.create({
   titleText: {
+    paddingLeft: 10,
     color: 'black',
-    paddingTop: 10,
+    paddingTop: 20,
     fontSize: 16,
     fontWeight: 'bold',
   },
