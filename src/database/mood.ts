@@ -8,7 +8,6 @@ export const getMoodRecords = (time: Date): Realm.Results<Mood> => {
 };
 
 export const addMoodRecord = (rating: number, time: Date) => {
-  console.log(time);
   const possiblePrevRecord = getRecentRecord<Mood>('Mood', time);
   if (possiblePrevRecord) {
     realm.write(() => {
@@ -45,7 +44,6 @@ export const editMoodRecord = (recordID: string, date?: Date, rating?: number, f
 
 export const alterMoodRecord = (comment: string, time: Date, setText: React.Dispatch<React.SetStateAction<string>>) => {
   const moodRecords = resultsToArray(getMoodRecords(time)).sort((a, b) => a.date.getTime() - b.date.getTime());
-  console.log(moodRecords);
   let record = moodRecords.pop();
   if (!record) {
     setText('No record to comment on.');

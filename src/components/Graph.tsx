@@ -5,7 +5,7 @@ import * as scale from 'd3-scale';
 import * as dateFns from 'date-fns';
 import * as shape from 'd3-shape';
 import {Circle, G, Line} from 'react-native-svg';
-import {Calorie, Mood, RecordString} from '../database/realm';
+import {Calorie, Mood, RecordString, Weight} from '../database/realm';
 import {getDaysSummary} from '../database/fullData';
 import {getRecordsPeriod} from '../database/general';
 import {useIsFocused} from '@react-navigation/core';
@@ -27,22 +27,20 @@ export type GraphInput = {
 
 const CalorieGraphConfig = (time: Date, timespan: Timespan): GraphInput => {
   let graphData = {} as GraphInput;
-  if (timespan !== 'day') {
-    graphData.lineData = getDaysSummary(timespanToStartDate(time, timespan), dayEnd(time)).map(record => ({
+  graphData.lineData = getDaysSummary(timespanToStartDate(time, timespan), dayEnd(time))
+    .map(record => ({
       date: record.day,
       value: record.calories,
-    }));
-    graphData.lineData.sort((a, b) => a.date.getTime() - b.date.getTime());
-    graphData.max = Math.max(...graphData.lineData.map(point => point.value || 0), 1400) + 100;
-  } else {
-    graphData.lineData = getRecordsPeriod<Calorie>('Calorie', dayStart(time), dayEnd(time)).map(record => ({
-      date: record.date,
-      value: record.amount,
-    }));
-    graphData.max = Math.max(...graphData.lineData.map(point => point.value || 0), 500) + 100;
-    graphData.bar = true;
-  }
-  console.log(graphData.lineData);
+    }))
+    .filter(
+      record =>
+        record.value ||
+        (record.date.getMonth() == timespanToStartDate(time, timespan).getMonth() &&
+          record.date.getDate() == timespanToStartDate(time, timespan).getDate()),
+    );
+  graphData.lineData.sort((a, b) => a.date.getTime() - b.date.getTime());
+  graphData.max = Math.max(...graphData.lineData.map(point => point.value || 0), 1400) + 100;
+
   graphData.min = 0;
   graphData.lineColor = 'green';
   graphData.numberOfTicks = 10;
@@ -67,7 +65,6 @@ const CalorieDayGraphConfig = (time: Date): GraphInput => {
   }
   graphData.max = Math.max(...graphData.lineData.map(point => point.value || 0), 500) + 100;
   graphData.bar = true;
-  console.log(graphData.lineData);
   graphData.min = 0;
   graphData.lineColor = 'green';
   graphData.numberOfTicks = 10;
@@ -81,8 +78,12 @@ const MoodGraphConfig = (time: Date, timespan: Timespan): GraphInput => {
       date: record.day,
       value: record.mood,
     }))
-    .filter(dayData => dayData.value !== undefined);
-  console.log(graphData);
+    .filter(
+      record =>
+        record.value ||
+        (record.date.getMonth() == timespanToStartDate(time, timespan).getMonth() &&
+          record.date.getDate() == timespanToStartDate(time, timespan).getDate()),
+    );
   graphData.min = 0;
   graphData.max = 10;
   graphData.lineColor = 'blue';
@@ -96,12 +97,10 @@ const MoodDayGraphConfig = (time: Date): GraphInput => {
     date: record.date,
     value: record.rating,
   }));
-  console.log(graphData.lineData);
   let startEnd = getDayStartEnd(time);
   graphData.lineData = [{date: startEnd.start, value: undefined}, ...graphData.lineData, {date: startEnd.end, value: undefined}].sort(
     (a, b) => a.date.getTime() - b.date.getTime(),
   );
-  console.log(graphData.lineData);
   graphData.min = 0;
   graphData.max = 10;
   graphData.lineColor = 'blue';
@@ -112,7 +111,12 @@ const MoodDayGraphConfig = (time: Date): GraphInput => {
 const WeightGraphConfig = (time: Date, timespan: Timespan): GraphInput => {
   let graphData = {} as GraphInput;
   graphData.lineData = getDaysSummary(timespanToStartDate(time, timespan), dayEnd(time))
-    .filter(record => record.weight)
+    .filter(
+      record =>
+        record.weight ||
+        (record.day.getMonth() == timespanToStartDate(time, timespan).getMonth() &&
+          record.day.getDate() == timespanToStartDate(time, timespan).getDate()),
+    )
     .map(record => ({
       date: record.day,
       value: record.weight,
@@ -121,6 +125,8 @@ const WeightGraphConfig = (time: Date, timespan: Timespan): GraphInput => {
   graphData.max = (Math.max(...graphData.lineData.map(point => point.value || 0)) || 85) + 3;
   graphData.lineColor = 'red';
   graphData.numberOfTicks = 10;
+  console.log(graphData.lineData);
+
   return graphData;
 };
 
@@ -154,8 +160,6 @@ export const GraphWrapper = ({oneKey, twoKey, time, timespan}: GraphWrapperProps
 };
 
 const Graph = ({one, two, timespan}: {one: GraphInput; two: GraphInput; timespan: Timespan}) => {
-  console.log(one);
-  console.log(two);
   const isFocused = useIsFocused();
 
   const {height, width} = useWindowDimensions();

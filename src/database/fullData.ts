@@ -22,7 +22,6 @@ export const getDaysSummary = (startTime: Date, endTime: Date): DaySummary[] => 
   let firstDay = new Date(startTime);
   let dayResults: DaySummary[] = [];
   for (let d = firstDay; d <= dayEnd(endTime); d.setDate(d.getDate() + 1)) {
-    console.log(d);
     dayResults.push(getDaySummary(d));
   }
   return dayResults;

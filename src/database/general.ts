@@ -22,10 +22,8 @@ export const getGraphDataPeriod = (realmType: RecordString, startTime: Date, end
 };
 
 export const getRecentRecord = <T>(realmType: RecordString, time: Date): T | null => {
-  console.log('hi');
   const endTime = new Date();
   const prevTime = new Date(time);
-  console.log(prevTime);
   prevTime.setMinutes(time.getMinutes() - 3); // MAGIC NUMBER ALARM
   const possiblePrevRecord = getRecordsPeriod<T>(realmType, prevTime, endTime);
   if (possiblePrevRecord.length) {

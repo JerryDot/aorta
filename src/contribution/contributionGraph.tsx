@@ -153,9 +153,9 @@ class ContributionGraph extends AbstractChart<ContributionGraphProps, Contributi
         if (count) {
           const opacity = mapValue(
             count,
-            this.state.minValue,
-            this.state.maxValue,
-            0.15 + 0.05, // + 0.05 to make smaller values a bit more visible
+            0,
+            10,
+            0.05, // + 0.05 to make smaller values a bit more visible
             1,
           );
 

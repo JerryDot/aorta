@@ -105,7 +105,7 @@ const ActivityScreen = ({navigation}: Props) => {
     backgroundGradientFrom: '#FFFFFF',
     backgroundGradientFromOpacity: 0,
     backgroundGradientTo: '#FFFFFF',
-    backgroundGradientToOpacity: 0.5,
+    backgroundGradientToOpacity: 0.1,
     color: (opacity = 1) => `rgba(33, 150, 243, ${opacity})`,
     strokeWidth: 2, // optional, default 3
     barPercentage: 0.5,

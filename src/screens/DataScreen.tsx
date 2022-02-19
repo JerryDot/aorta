@@ -6,7 +6,7 @@ import {Button} from 'react-native-elements';
 import {DebugTimeContext, RootStackParamList} from '../../App';
 import {getAllData, insertAllData} from '../database/fullData';
 import realm from '../database/realm';
-import {testData} from '../utils/testData';
+import {getTestData} from '../utils/testData';
 
 type Props = NativeStackScreenProps<RootStackParamList, 'Home'>;
 
@@ -39,7 +39,7 @@ const DataScreen = ({navigation}: Props) => {
       />
       <Button title="Import data." disabled={!text} onPress={() => insertAllData(JSON.parse(text))} />
       <Button title="Clear tables" containerStyle={{paddingTop: 5}} onPress={() => realm.write(() => realm.deleteAll())} />
-      <Button title="Add test-data" containerStyle={{paddingTop: 5}} onPress={() => insertAllData(testData)} />
+      <Button title="Add test-data" containerStyle={{paddingTop: 5}} onPress={() => insertAllData(getTestData(3))} />
     </ScrollView>
   );
 };

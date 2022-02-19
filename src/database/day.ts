@@ -7,7 +7,7 @@ export type DaySummary = {
   day: Date;
   mood: number;
   activities: string[];
-  calories: number;
+  calories?: number;
   weight?: number;
 };
 
@@ -24,16 +24,13 @@ export const getDaySummary = (time: Date): DaySummary => {
     day: new Date(time),
     mood: getDayRecords<Mood>('Mood', time).avg('rating'),
     activities: getDayRecords<Activity>('Activity', time).map(record => record.type),
-    calories: getDayRecords<Calorie>('Calorie', time).sum('amount') || 0,
-    weight: (getDayRecords<Weight>('Weight', time)[0] || {amount: 0}).amount,
+    calories: getDayRecords<Calorie>('Calorie', time).sum('amount') || undefined,
+    weight: getDayRecords<Weight>('Weight', time).avg('amount'),
   };
   return day;
 };
 
 export const getAllDayRecords = (time: Date): FullDay => {
-  console.log(getDayRecords<Mood>('Mood', time));
-  console.log(resultsToArray(getDayRecords<Mood>('Mood', time)));
-
   let day: FullDay = {
     day: new Date(time),
     moods: resultsToArray(getDayRecords<Mood>('Mood', time)),
