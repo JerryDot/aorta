@@ -8,6 +8,10 @@ import {DebugTimeContext, RootStackParamList} from '../../App';
 import ContributionGraph from '../contribution';
 import {addActivityRecord, getActivityRecords} from '../database/activity';
 import {deleteRecord} from '../database/general';
+import {DaySummary} from '../database/day';
+import {getDaysSummary} from '../database/fullData';
+
+export type ActivityType = 'sport' | 'social' | 'dating' | 'study' | 'alcohol' | 'wfh' | 'wfo' | 'w+' | 'w-' | 'o+' | 'o-';
 
 export type activityColors = {
   sport: string;
@@ -18,7 +22,6 @@ export type activityColors = {
   wfh: string;
   wfo: string;
   'w+': string;
-  'w-': string;
   'o+': string;
   'o-': string;
 };
@@ -32,7 +35,6 @@ const activityColorMap = {
   wfh: 'orange',
   wfo: 'yellow',
   'w+': 'black',
-  'w-': 'grey',
   'o+': 'green',
   'o-': 'red',
 };
@@ -40,16 +42,23 @@ const activityColorMap = {
 type Props = NativeStackScreenProps<RootStackParamList, 'Home'>;
 
 const ActivityScreen = ({navigation}: Props) => {
+  const graphDuration = 77;
   const {debugTime, setDebugTime} = useContext(DebugTimeContext);
+  let currentTime = debugTime || new Date();
+  let oldenTime = new Date(currentTime);
+  oldenTime.setDate(oldenTime.getDate() - graphDuration);
   const [dailyRecords, setDailyRecords] = useState(getActivityRecords(debugTime || new Date()));
+  const [graphActivityRecords, setGraphActivityRecords] = useState<DaySummary[]>(getDaysSummary(oldenTime, currentTime));
   const {height, width} = useWindowDimensions();
+  const [activity, setActivity] = useState<ActivityType>('sport');
 
   const buttonOptions = ['sport', 'social', 'dating'];
   const secondButtonOptions = ['study', 'o+', 'o-', 'alcohol'];
-  const thirdButtonOptions = ['wfh', 'wfo', 'w+', 'w-'];
+  const thirdButtonOptions = ['wfh', 'wfo', 'w+'];
 
   const refetchDailyRecords = () => {
     setDailyRecords(getActivityRecords(debugTime || new Date()));
+    setGraphActivityRecords(getDaysSummary(oldenTime, currentTime));
   };
 
   const addActivityRecordHandler = (type: string) => {
@@ -68,6 +77,15 @@ const ActivityScreen = ({navigation}: Props) => {
     </View>
   );
 
+  const fullGraphData = (daySummaries: DaySummary[], activity: string) =>
+    daySummaries
+      .map(day => ({
+        date: day.day.toLocaleDateString('en-CA'),
+        count: day.mood,
+        activityType: day.activities.filter(act => act === activity),
+      }))
+      .filter(day => day.count);
+
   const commitsData = [
     {date: '2017-01-02', count: 1},
     {date: '2017-01-03', count: 2},
@@ -79,7 +97,8 @@ const ActivityScreen = ({navigation}: Props) => {
     {date: '2017-03-01', count: 2, activityType: 'sport'},
     {date: '2017-04-05', count: 4, activityType: 'sport'},
     {date: '2022-01-01', count: 2},
-    {date: '2022-01-21', count: 4},
+    {date: '2022-01-21', count: 4, activityType: 'sport'},
+    {date: '2022-01-28', count: 9, activityType: 'sport'},
   ];
 
   const chartConfig = {
@@ -132,21 +151,23 @@ const ActivityScreen = ({navigation}: Props) => {
         ))}
         <View>
           <ScrollView horizontal={true}>
-            <ContributionGraph
-              key={'sadfasf'}
-              values={commitsData}
-              endDate={new Date('2022-01-25')}
-              numDays={77}
-              // width={screenWidth}
-              height={250}
-              width={width} // chartConfig={chartConfig}
-              tooltipDataAttrs={null}
-              chartConfig={chartConfig}
-              gutterSize={5}
-              borderSize={3}
-              showOutOfRangeDays={true}
-              activityColorMap={activityColorMap}
-            />
+            {activity && graphActivityRecords && (
+              <ContributionGraph
+                key={'sadfasf'}
+                values={fullGraphData(graphActivityRecords, activity)}
+                endDate={currentTime}
+                numDays={graphDuration}
+                // width={screenWidth}
+                height={250}
+                width={width} // chartConfig={chartConfig}
+                tooltipDataAttrs={null}
+                chartConfig={chartConfig}
+                gutterSize={5}
+                borderSize={3}
+                showOutOfRangeDays={true}
+                activityColorMap={activityColorMap}
+              />
+            )}
           </ScrollView>
         </View>
       </ScrollView>

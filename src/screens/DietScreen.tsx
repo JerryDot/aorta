@@ -1,20 +1,21 @@
 import {NativeStackScreenProps} from '@react-navigation/native-stack';
 import moment from 'moment';
 import React, {useContext, useState} from 'react';
-import {StyleSheet, Text, TextInput, View} from 'react-native';
-import {Grid, Col} from 'react-native-easy-grid';
+import {StyleSheet, Text, TextInput, useWindowDimensions, View} from 'react-native';
+import {Grid, Col, Row} from 'react-native-easy-grid';
 import {Button} from 'react-native-elements';
 import {ScrollView} from 'react-native-gesture-handler';
 import {DebugTimeContext, RootStackParamList} from '../../App';
 import {addCalorieRecord, getCalorieRecords} from '../database/calorie';
 import {deleteRecord} from '../database/general';
 import {addWeightRecord, getWeightRecords} from '../database/weight';
-import {dayStart} from '../utils/timeUtils';
+import {dayStart, dString} from '../utils/timeUtils';
 
 type Props = NativeStackScreenProps<RootStackParamList, 'Home'>;
 
 const DietScreen = ({navigation}: Props) => {
   const {debugTime, setDebugTime} = useContext(DebugTimeContext);
+  const {height, width} = useWindowDimensions();
   const [dailyRecords, setDailyRecords] = useState(getCalorieRecords(dayStart(debugTime || new Date())));
   const [dailyWeightRecords, setDailyWeightRecords] = useState(getWeightRecords(dayStart(debugTime || new Date())));
   const buttonOptions = [25, 50, 100];
@@ -99,6 +100,22 @@ const DietScreen = ({navigation}: Props) => {
               <AddCalorieButton key={'acb' + amount} amount={amount} />
             ))}
           </View>
+          <ScrollView style={{height: width}}>
+            <Grid style={{height: width}}>
+              {dailyRecords.map(record => (
+                <Row key={record.recordID + 'row'}>
+                  <Col size={1}>
+                    <Text style={styles.titleText} key={record.recordID} onPress={() => deleteCalorieRecordHandler(record.recordID)}>
+                      {`${dString(record.date)}`}
+                    </Text>
+                  </Col>
+                  <Col size={1}>
+                    <Text style={styles.titleText}>{`${record.amount}`}</Text>
+                  </Col>
+                </Row>
+              ))}
+            </Grid>
+          </ScrollView>
           {dailyRecords.map(record => (
             <Text
               style={styles.titleText}

@@ -4,18 +4,18 @@ import {StyleSheet, Text, TextInput, useWindowDimensions, View} from 'react-nati
 import {DebugTimeContext, RootStackParamList} from '../../App';
 import 'react-native-get-random-values';
 import {addMoodRecord, alterMoodRecord, getMoodRecords} from '../database/mood';
-import moment from 'moment';
 import {deleteRecord} from '../database/general';
 import {Grid, Col, Row} from 'react-native-easy-grid';
 import {Button} from 'react-native-elements';
 import {dayStart, dString} from '../utils/timeUtils';
 import {ScrollView} from 'react-native-gesture-handler';
+import {Mood} from '../database/realm';
 
 type Props = NativeStackScreenProps<RootStackParamList, 'Home'>;
 
 const MoodScreen = ({navigation}: Props) => {
   const {debugTime, setDebugTime} = useContext(DebugTimeContext);
-  const [dailyRecords, setDailyRecords] = useState(getMoodRecords(dayStart(debugTime || new Date())));
+  const [dailyRecords, setDailyRecords] = useState<Realm.Results<Mood>>(getMoodRecords(dayStart(debugTime || new Date())));
   const buttonOptions = [1, 2, 3, 4, 5];
   const secondButtonOptions = [6, 7, 8, 9, 10];
   const {height, width} = useWindowDimensions();
@@ -77,17 +77,17 @@ const MoodScreen = ({navigation}: Props) => {
       <ScrollView style={{height: width}}>
         <Grid style={{height: width}}>
           {dailyRecords.map(record => (
-            <Row>
-              <Col>
+            <Row key={record.recordID + 'row'}>
+              <Col size={1}>
                 <Text style={styles.titleText} key={record.recordID} onPress={() => deleteMoodRecordHandler(record.recordID)}>
                   {`${dString(record.date)}`}
                 </Text>
               </Col>
-              <Col>
-                <Text>{`${record.rating}`}</Text>
+              <Col size={1}>
+                <Text style={styles.titleText}>{`${record.rating}`}</Text>
               </Col>
-              <Col>
-                <Text>{`${record.comment}`}</Text>
+              <Col size={3}>
+                <Text style={styles.titleText}>{`${record.comment}`}</Text>
               </Col>
             </Row>
           ))}
