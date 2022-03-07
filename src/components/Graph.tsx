@@ -132,35 +132,39 @@ const WeightGraphConfig = (time: Date, timespan: Timespan): GraphInput => {
 
 type GraphWrapperProps = {oneKey: RecordString; twoKey: RecordString; time: Date; timespan: Timespan};
 
-export const GraphWrapper = ({oneKey, twoKey, time, timespan}: GraphWrapperProps) => {
-  const keyToInput = (key: RecordString): GraphInput => {
-    switch (key) {
-      case 'Mood':
-        return timespan === 'day' ? MoodDayGraphConfig(time) : MoodGraphConfig(time, timespan);
-      case 'Calorie':
-        return timespan === 'day' ? CalorieDayGraphConfig(time) : CalorieGraphConfig(time, timespan);
-      case 'Weight':
-        return WeightGraphConfig(time, timespan);
-      case 'Activity':
-        throw 'Wow very active graph';
-    }
-  };
+const keyToInput = (key: RecordString, time: Date, timespan: Timespan): GraphInput => {
+  switch (key) {
+    case 'Mood':
+      return timespan === 'day' ? MoodDayGraphConfig(time) : MoodGraphConfig(time, timespan);
+    case 'Calorie':
+      return timespan === 'day' ? CalorieDayGraphConfig(time) : CalorieGraphConfig(time, timespan);
+    case 'Weight':
+      return WeightGraphConfig(time, timespan);
+    case 'Activity':
+      throw 'Wow very active graph';
+    case 'Sleep':
+      throw 'Unimplemented';
+  }
+};
 
+export const GraphWrapper = ({oneKey, twoKey, time, timespan}: GraphWrapperProps) => {
   return (
     <>
       <View style={{flexDirection: 'row'}}>
         <Graph
-          one={oneKey ? keyToInput(oneKey) : keyToInput(oneKey)}
-          two={twoKey ? keyToInput(twoKey) : keyToInput(twoKey)}
+          one={oneKey ? keyToInput(oneKey, time, timespan) : keyToInput(oneKey, time, timespan)}
+          two={twoKey ? keyToInput(twoKey, time, timespan) : keyToInput(twoKey, time, timespan)}
           timespan={timespan}
+          sameKeys={oneKey === twoKey && oneKey}
         />
       </View>
     </>
   );
 };
 
-const Graph = ({one, two, timespan}: {one: GraphInput; two: GraphInput; timespan: Timespan}) => {
+const Graph = ({one, two, timespan, sameKeys}: {one: GraphInput; two: GraphInput; timespan: Timespan; sameKeys: RecordString | false}) => {
   const isFocused = useIsFocused();
+  console.log(sameKeys);
 
   const {height, width} = useWindowDimensions();
 
@@ -185,6 +189,38 @@ const Graph = ({one, two, timespan}: {one: GraphInput; two: GraphInput; timespan
 
   const Decorator = ({x, y, data, color}) => {
     return data.map((value, index) => <Circle key={index} cx={x(value.date)} cy={y(value.value)} r={3} stroke={color} fill={'white'} />);
+  };
+
+  const SecondaryLineChart = ({key, time, timespan}: {key: RecordString; time: Date; timespan: Timespan}) => {
+    const graphDatas = [];
+    const workingTime = new Date(time);
+    let daysBack = timespan === 'all' || timespan === 'month' ? 30 : timespan === 'week' ? 7 : 0;
+    for (var i = 0; i < daysBack; i++) {
+      workingTime.setDate(workingTime.getDate() - 1);
+      console.log(key);
+      console.log(workingTime);
+      let two = keyToInput(key, workingTime, 'day');
+      console.log(two);
+      graphDatas.push(two);
+    }
+    console.log(graphDatas);
+    return graphDatas.map(data => (
+      <LineChart
+        style={StyleSheet.absoluteFill}
+        svg={{fill: 'none', stroke: 'blue'}}
+        data={data.lineData}
+        xAccessor={({item}) => item.date}
+        yAccessor={({item}) => item.value}
+        yMax={data.max}
+        yMin={data.min}
+        contentInset={contentInset}
+        curve={shape.curveBumpX}
+        yScale={scale.scaleLinear}
+        xScale={scale.scaleTime}>
+        {/* <Decorator color={data.lineColor} /> */}
+        <CustomGrid belowChart={true} />
+      </LineChart>
+    ));
   };
 
   return (
@@ -250,6 +286,11 @@ const Graph = ({one, two, timespan}: {one: GraphInput; two: GraphInput; timespan
               <Decorator color={two.lineColor} />
               <CustomGrid belowChart={true} />
             </LineChart>
+          )}
+          {sameKeys && (
+            <>
+              <SecondaryLineChart key={sameKeys} time={new Date()} timespan={timespan} />
+            </>
           )}
           {two.bar && (
             <BarChart

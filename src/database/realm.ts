@@ -1,7 +1,7 @@
 import Realm from 'realm';
 
-export type RecordType = Calorie | Weight | Mood | Activity;
-export type RecordString = 'Calorie' | 'Weight' | 'Mood' | 'Activity';
+export type RecordType = Calorie | Weight | Mood | Activity | Sleep;
+export type RecordString = 'Calorie' | 'Weight' | 'Mood' | 'Activity' | 'Sleep';
 
 export class Mood {
   public static schema: Realm.ObjectSchema = {
@@ -131,4 +131,34 @@ export class Activity {
   }
 }
 
-export default new Realm({schema: [Mood.schema, Calorie.schema, Weight.schema, Activity.schema]});
+export class Sleep {
+  public static schema: Realm.ObjectSchema = {
+    name: 'Sleep',
+    properties: {
+      wake: {type: 'date', indexed: true},
+      doze: 'date',
+      recordID: 'string',
+    },
+    primaryKey: 'recordID',
+  };
+
+  public wake: Date;
+  public doze: Date;
+  public recordID: string;
+
+  get values() {
+    return {
+      recordID: this.recordID,
+      startDate: this.doze,
+      date: this.wake,
+    };
+  }
+
+  constructor(date: Date, startDate: Date, recordID: string) {
+    this.wake = date;
+    this.doze = startDate;
+    this.recordID = recordID;
+  }
+}
+
+export default new Realm({schema: [Mood.schema, Calorie.schema, Weight.schema, Activity.schema, Sleep.schema]});
