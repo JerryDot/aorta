@@ -135,6 +135,7 @@ export class Sleep {
   public static schema: Realm.ObjectSchema = {
     name: 'Sleep',
     properties: {
+      date: 'date',
       wake: {type: 'date', indexed: true},
       doze: 'date',
       recordID: 'string',
@@ -142,6 +143,7 @@ export class Sleep {
     primaryKey: 'recordID',
   };
 
+  public date: Date;
   public wake: Date;
   public doze: Date;
   public recordID: string;
@@ -149,14 +151,16 @@ export class Sleep {
   get values() {
     return {
       recordID: this.recordID,
-      startDate: this.doze,
-      date: this.wake,
+      doze: this.doze,
+      wake: this.wake,
+      date: this.date,
     };
   }
 
-  constructor(date: Date, startDate: Date, recordID: string) {
-    this.wake = date;
-    this.doze = startDate;
+  constructor(date: Date, doze: Date, wake: Date, recordID: string) {
+    this.date = date;
+    this.wake = wake;
+    this.doze = doze;
     this.recordID = recordID;
   }
 }

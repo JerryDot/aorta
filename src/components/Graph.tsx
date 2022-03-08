@@ -155,16 +155,16 @@ export const GraphWrapper = ({oneKey, twoKey, time, timespan}: GraphWrapperProps
           one={oneKey ? keyToInput(oneKey, time, timespan) : keyToInput(oneKey, time, timespan)}
           two={twoKey ? keyToInput(twoKey, time, timespan) : keyToInput(twoKey, time, timespan)}
           timespan={timespan}
-          sameKeys={oneKey === twoKey && oneKey}
+          // sameKeys={oneKey === twoKey && oneKey}
         />
       </View>
     </>
   );
 };
 
-const Graph = ({one, two, timespan, sameKeys}: {one: GraphInput; two: GraphInput; timespan: Timespan; sameKeys: RecordString | false}) => {
+const Graph = ({one, two, timespan}: {one: GraphInput; two: GraphInput; timespan: Timespan}) => {
   const isFocused = useIsFocused();
-  console.log(sameKeys);
+  // console.log(sameKeys);
 
   const {height, width} = useWindowDimensions();
 
@@ -287,11 +287,11 @@ const Graph = ({one, two, timespan, sameKeys}: {one: GraphInput; two: GraphInput
               <CustomGrid belowChart={true} />
             </LineChart>
           )}
-          {sameKeys && (
+          {/* {sameKeys && (
             <>
               <SecondaryLineChart key={sameKeys} time={new Date()} timespan={timespan} />
             </>
-          )}
+          )} */}
           {two.bar && (
             <BarChart
               style={StyleSheet.absoluteFill}

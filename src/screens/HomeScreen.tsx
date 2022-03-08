@@ -38,6 +38,9 @@ const HomeScreen = ({navigation}: Props) => {
             <Button title="Activity" onPress={() => navigation.navigate('Activity')} />
           </Col>
           <Col>
+            <Button title="Sleep" onPress={() => navigation.navigate('Sleep')} />
+          </Col>
+          <Col>
             <Button title="Data" onPress={() => navigation.navigate('Data')} />
           </Col>
         </Grid>

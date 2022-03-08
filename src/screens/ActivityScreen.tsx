@@ -1,5 +1,4 @@
 import {NativeStackScreenProps} from '@react-navigation/native-stack';
-import moment from 'moment';
 import React, {useContext, useState} from 'react';
 import {ScrollView, StyleSheet, Text, useWindowDimensions, View} from 'react-native';
 import {Grid, Col} from 'react-native-easy-grid';
@@ -10,6 +9,7 @@ import {addActivityRecord, getActivityRecords} from '../database/activity';
 import {deleteRecord} from '../database/general';
 import {DaySummary} from '../database/day';
 import {getDaysSummary} from '../database/fullData';
+import SegmentedControlTab from 'react-native-segmented-control-tab';
 
 export type ActivityType = 'sport' | 'social' | 'dating' | 'study' | 'alcohol' | 'wfh' | 'wfo' | 'w+' | 'w-' | 'o+' | 'o-';
 
@@ -52,9 +52,10 @@ const ActivityScreen = ({navigation}: Props) => {
   const {height, width} = useWindowDimensions();
   const [activity, setActivity] = useState<ActivityType>('sport');
 
-  const buttonOptions = ['sport', 'social', 'dating'];
-  const secondButtonOptions = ['study', 'o+', 'o-', 'alcohol'];
-  const thirdButtonOptions = ['wfh', 'wfo', 'w+'];
+  const buttonOptions: ActivityType[] = ['sport', 'social', 'dating'];
+  const secondButtonOptions: ActivityType[] = ['study', 'o+', 'o-', 'alcohol'];
+  const thirdButtonOptions: ActivityType[] = ['wfh', 'wfo', 'w+'];
+  const [select, setSelect] = useState<boolean>(false);
 
   const refetchDailyRecords = () => {
     setDailyRecords(getActivityRecords(debugTime || new Date()));
@@ -71,9 +72,14 @@ const ActivityScreen = ({navigation}: Props) => {
     refetchDailyRecords();
   };
 
-  const AddActivityButton = ({type}: {type: string}) => (
+  const ActivityButton = ({type}: {type: ActivityType}) => (
     <View style={{width: '30%', height: 50, justifyContent: 'center', flexWrap: 'wrap', flexDirection: 'row', flex: 1}}>
-      <Button buttonStyle={{height: 50, width: 80}} key={type} title={type} onPress={() => addActivityRecordHandler(type)} />
+      <Button
+        buttonStyle={{height: 50, width: 80}}
+        key={type}
+        title={type}
+        onPress={select ? () => setActivity(type) : () => addActivityRecordHandler(type)}
+      />
     </View>
   );
 
@@ -130,25 +136,30 @@ const ActivityScreen = ({navigation}: Props) => {
       <ScrollView>
         <Text style={{color: 'black'}}>This is {dailyRecords.length} activities.</Text>
         <View style={{paddingTop: 10, flexDirection: 'row', flexWrap: 'wrap'}}>
-          {buttonOptions.map(type => (
-            <AddActivityButton key={'aab' + type} type={type} />
+          {buttonOptions.map((type: ActivityType) => (
+            <ActivityButton key={'aab' + type} type={type} />
           ))}
         </View>
         <View style={{paddingTop: 20, flexDirection: 'row', flexWrap: 'wrap'}}>
           {secondButtonOptions.map(type => (
-            <AddActivityButton key={'aab' + type} type={type} />
+            <ActivityButton key={'aab' + type} type={type} />
           ))}
         </View>
         <View style={{paddingTop: 20, flexDirection: 'row', flexWrap: 'wrap'}}>
           {thirdButtonOptions.map(type => (
-            <AddActivityButton key={'aab' + type} type={type} />
+            <ActivityButton key={'aab' + type} type={type} />
           ))}
         </View>
-        {dailyRecords.map(record => (
-          <Text style={styles.titleText} key={record.recordID} onPress={() => deleteActivityRecordHandler(record.recordID)}>
-            {`${record.date.toDateString()} ${record.type}`}
-          </Text>
-        ))}
+        <SegmentedControlTab
+          tabsContainerStyle={{paddingVertical: 15, paddingHorizontal: 20}}
+          tabStyle={{borderColor: '#2196F3'}}
+          activeTabStyle={{backgroundColor: '#2196F3'}}
+          tabTextStyle={{color: '#2196F3'}}
+          selectedIndex={Number(select)}
+          allowFontScaling={false}
+          values={['Add', 'Select']}
+          onTabPress={index => setSelect(Boolean(index))}
+        />
         <View>
           <ScrollView horizontal={true}>
             {activity && graphActivityRecords && (
@@ -170,6 +181,11 @@ const ActivityScreen = ({navigation}: Props) => {
             )}
           </ScrollView>
         </View>
+        {dailyRecords.map(record => (
+          <Text style={styles.titleText} key={record.recordID} onPress={() => deleteActivityRecordHandler(record.recordID)}>
+            {`${record.date.toDateString()} ${record.type}`}
+          </Text>
+        ))}
       </ScrollView>
     </>
   );

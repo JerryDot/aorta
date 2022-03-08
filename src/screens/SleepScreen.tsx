@@ -35,15 +35,30 @@ const SleepScreen = ({navigation}: Props) => {
   const [wake, setWake] = useState<Date>(dailyRecords.wake);
   const {height, width} = useWindowDimensions();
 
-  const refetchDailyRecords = () => {
-    setDailyRecords(getSleepRecord(dayStart(debugTime || new Date())));
-    setDoze(dailyRecords.doze);
-    setWake(dailyRecords.wake);
+  const refetchDailyRecords = (doze?: Date, wake?: Date) => {
+    setDailyRecords(
+      getSleepRecord(dayStart(debugTime || new Date())) || {
+        doze: new Date(
+          (debugTime || new Date()).getFullYear(),
+          (debugTime || new Date()).getMonth(),
+          (debugTime || new Date()).getDate() - 1,
+          23,
+        ),
+        wake: new Date(
+          (debugTime || new Date()).getFullYear(),
+          (debugTime || new Date()).getMonth(),
+          (debugTime || new Date()).getDate(),
+          7,
+        ),
+      },
+    );
+    doze && setDoze(doze);
+    wake && setWake(wake);
   };
 
   const putSleepRecordHandler = () => {
     putSleepRecord(debugTime || new Date(), doze, wake);
-    refetchDailyRecords();
+    setDailyRecords({doze: doze, wake: wake});
   };
 
   const deleteSleepRecordHandler = (recordId: string) => {
@@ -67,17 +82,17 @@ const SleepScreen = ({navigation}: Props) => {
         </Grid>
       </View>
       <Text style={{color: 'black'}}>Previous day sleep start and end times</Text>
-      <DatePicker date={doze} onDateChange={setDoze} mode="time" />
-      <DatePicker date={wake} onDateChange={setWake} mode="time" />
+      <DatePicker date={dailyRecords.doze} onDateChange={setDoze} mode="time" />
+      <DatePicker date={dailyRecords.wake} onDateChange={setWake} mode="time" />
       <Button title="Save sleeps" containerStyle={{paddingTop: 5}} onPress={() => putSleepRecordHandler()} />
       <ScrollView style={{height: width}}>
         <Grid style={{height: width}}>
           <Row key={'sleep' + 'row'}>
             <Col size={1}>
-              <Text style={styles.titleText}>{`${dailyRecords.doze}`}</Text>
+              <Text style={styles.titleText}>{`${dailyRecords && dailyRecords.doze}`}</Text>
             </Col>
             <Col size={1}>
-              <Text style={styles.titleText}>{`${dailyRecords.wake}`}</Text>
+              <Text style={styles.titleText}>{`${dailyRecords && dailyRecords.wake}`}</Text>
             </Col>
           </Row>
         </Grid>
