@@ -9,6 +9,7 @@ import DietScreen from './src/screens/DietScreen';
 import MoodScreen from './src/screens/MoodScreen';
 import ActivityScreen from './src/screens/ActivityScreen';
 import DataScreen from './src/screens/DataScreen';
+import SleepScreen from './src/screens/SleepScreen';
 import {LogBox} from 'react-native';
 
 LogBox.ignoreLogs([
@@ -23,6 +24,7 @@ export type RootStackParamList = {
   Diet: undefined;
   Mood: undefined;
   Activity: undefined;
+  Sleep: undefined;
   Data: undefined;
 };
 
@@ -48,6 +50,7 @@ const App = () => {
           <Stack.Screen name="Diet" component={DietScreen} />
           <Stack.Screen name="Mood" component={MoodScreen} />
           <Stack.Screen name="Activity" component={ActivityScreen} />
+          <Stack.Screen name="Sleep" component={SleepScreen} />
           <Stack.Screen name="Data" component={DataScreen} />
         </Stack.Navigator>
       </NavigationContainer>
