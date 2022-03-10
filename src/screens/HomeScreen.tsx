@@ -40,9 +40,6 @@ const HomeScreen = ({navigation}: Props) => {
           <Col>
             <Button title="Sleep" onPress={() => navigation.navigate('Sleep')} />
           </Col>
-          <Col>
-            <Button title="Data" onPress={() => navigation.navigate('Data')} />
-          </Col>
         </Grid>
         <View key={key} style={{paddingBottom: 30}}>
           <GraphWrapper oneKey={oneKey} twoKey={twoKey} time={graphTime} timespan={graphTimespan} />

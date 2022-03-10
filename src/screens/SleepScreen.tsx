@@ -71,7 +71,7 @@ const SleepScreen = ({navigation}: Props) => {
       <View style={{height: 40}}>
         <Grid>
           <Col>
-            <Button title="Sleep" onPress={() => navigation.navigate('Mood')} />
+            <Button title="Mood" onPress={() => navigation.navigate('Mood')} />
           </Col>
           <Col>
             <Button title="Diet" onPress={() => navigation.navigate('Diet')} />
@@ -79,11 +79,14 @@ const SleepScreen = ({navigation}: Props) => {
           <Col>
             <Button title="Activity" onPress={() => navigation.navigate('Activity')} />
           </Col>
+          <Col>
+            <Button title="Sleep" onPress={() => navigation.navigate('Sleep')} />
+          </Col>
         </Grid>
       </View>
       <Text style={{color: 'black'}}>Previous day sleep start and end times</Text>
-      <DatePicker date={dailyRecords.doze} onDateChange={setDoze} mode="time" />
-      <DatePicker date={dailyRecords.wake} onDateChange={setWake} mode="time" />
+      <DatePicker date={dailyRecords && dailyRecords.doze} onDateChange={setDoze} mode="time" />
+      <DatePicker date={dailyRecords && dailyRecords.wake} onDateChange={setWake} mode="time" />
       <Button title="Save sleeps" containerStyle={{paddingTop: 5}} onPress={() => putSleepRecordHandler()} />
       <ScrollView style={{height: width}}>
         <Grid style={{height: width}}>

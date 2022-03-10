@@ -1,0 +1,15 @@
+TODO:
+Graph
+  - Refactor code to something sensible
+  - Support Activity/comments
+  - Multiday
+  - Sleep
+  - View past days
+  - Export graph
+Contribution Graph
+  - Consider other uses
+Improve data entry screens
+  - Style "Select" on Activity screen
+  - Improve appearance of sleep page
+Style
+  - Nothing in the app looks very good! Fix that!

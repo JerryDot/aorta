@@ -10,7 +10,7 @@ import MoodScreen from './src/screens/MoodScreen';
 import ActivityScreen from './src/screens/ActivityScreen';
 import DataScreen from './src/screens/DataScreen';
 import SleepScreen from './src/screens/SleepScreen';
-import {LogBox} from 'react-native';
+import {LogBox, Text, TouchableOpacity, View} from 'react-native';
 
 LogBox.ignoreLogs([
   "[react-native-gesture-handler] Seems like you're using an old API with gesture components, check out new Gestures system!",
@@ -46,7 +46,17 @@ const App = () => {
     <DebugTimeContext.Provider value={value}>
       <NavigationContainer>
         <Stack.Navigator>
-          <Stack.Screen name="Home" component={HomeScreen} />
+          <Stack.Screen
+            name="Home"
+            component={HomeScreen}
+            options={({navigation}) => ({
+              headerRight: () => (
+                <TouchableOpacity onPress={() => navigation.navigate('Data')}>
+                  <Text style={{color: 'black', fontSize: 16, fontWeight: 'bold'}}>Settings</Text>
+                </TouchableOpacity>
+              ),
+            })}
+          />
           <Stack.Screen name="Diet" component={DietScreen} />
           <Stack.Screen name="Mood" component={MoodScreen} />
           <Stack.Screen name="Activity" component={ActivityScreen} />

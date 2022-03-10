@@ -85,6 +85,9 @@ const DietScreen = ({navigation}: Props) => {
           <Col>
             <Button title="Activity" onPress={() => navigation.navigate('Activity')} />
           </Col>
+          <Col>
+            <Button title="Sleep" onPress={() => navigation.navigate('Sleep')} />
+          </Col>
         </Grid>
       </View>
       <ScrollView>

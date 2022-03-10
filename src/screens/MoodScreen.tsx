@@ -59,6 +59,9 @@ const MoodScreen = ({navigation}: Props) => {
           <Col>
             <Button title="Activity" onPress={() => navigation.navigate('Activity')} />
           </Col>
+          <Col>
+            <Button title="Sleep" onPress={() => navigation.navigate('Sleep')} />
+          </Col>
         </Grid>
       </View>
       <Text style={{color: 'black'}}>
@@ -94,8 +97,8 @@ const MoodScreen = ({navigation}: Props) => {
         </Grid>
       </ScrollView>
       <TextInput
-        style={{height: 80, color: 'black', fontSize: 20, paddingTop: 10}}
-        placeholder="Import data from text."
+        style={{height: 80, color: 'gray', fontSize: 20, paddingTop: 10}}
+        placeholder="Add comment"
         placeholderTextColor={'black'}
         onChangeText={moodComment => setMoodComment(moodComment)}
         defaultValue={moodComment}

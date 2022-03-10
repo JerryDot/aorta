@@ -1,0 +1,17 @@
+
+Commands to run:
+- npx react-native start on one terminal
+- npx react-natve run-android on another
+
+Need an android phone/emulator available
+Use `adb devices` to see the list of connected devices
+
+## Run debug and release on same phone
+- Go to 'android/app/build.gradle'
+- Locate the line which contains the app id:
+    applicationId "com.xxxxxx"
+- Change the app id to any name, good example is using adding a .debug, eg
+    applicationId "com.xxx.debug"
+- Can locate android/app/src/main/res/values/string.xml and change the name of the app 
+    <string name="app_name">MyAppName</string> to 
+    <string name="app_name">MyAppName.Debug</string>
