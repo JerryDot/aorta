@@ -41,10 +41,6 @@
 
 ## About
 
-<table>
-<tr>
-<td>
-
 Key features of **aorta**:
 
 - Easy tracking for mood, sleep, calories and more.
